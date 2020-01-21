@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>10</integer>
+	<key>logs</key>
+	<dict>
+		<key>1FF21973-59A3-4BA4-AA64-E935089898E9</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>1FF21973-59A3-4BA4-AA64-E935089898E9.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>wowwao1 project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>wowwao1</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building workspace wowwao1 with scheme wowwao1 and configuration Debug</string>
+			<key>timeStartedRecording</key>
+			<real>601215459.04343605</real>
+			<key>timeStoppedRecording</key>
+			<real>601215466.38959706</real>
+			<key>title</key>
+			<string>Building workspace wowwao1 with scheme wowwao1 and configuration Debug</string>
+			<key>uniqueIdentifier</key>
+			<string>1FF21973-59A3-4BA4-AA64-E935089898E9</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

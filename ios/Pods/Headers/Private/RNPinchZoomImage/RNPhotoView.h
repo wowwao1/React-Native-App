@@ -1,0 +1,1 @@
+../../../../../node_modules/react-native-pinch-zoom-image/ios/RNPhotoView.h

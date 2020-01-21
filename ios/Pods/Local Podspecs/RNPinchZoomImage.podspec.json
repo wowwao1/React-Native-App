@@ -1,0 +1,26 @@
+{
+  "name": "RNPinchZoomImage",
+  "version": "0.0.10",
+  "summary": "Component supports view image with pinch and zoom action",
+  "description": "Pinch to zoom and pan image",
+  "homepage": "https://github.com/moonjava2005/react-native-pinch-zoom-image",
+  "license": "MIT",
+  "authors": {
+    "name": "MoonJava",
+    "email": "moonjava@gmail.com"
+  },
+  "platforms": {
+    "ios": "9.0"
+  },
+  "source": {
+    "git": "git://github.com/moonjava2005/react-native-pinch-zoom-image.git",
+    "tag": "0.0.10"
+  },
+  "source_files": "ios/**/*.{h,m}",
+  "requires_arc": true,
+  "dependencies": {
+    "React": [
+
+    ]
+  }
+}
