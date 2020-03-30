@@ -1,2 +1,2 @@
 dependencies: \
-  /Users/mac/Documents/wowwao1/ios/Pods/Target\ Support\ Files/Pods-wowwao1Tests/Pods-wowwao1Tests-dummy.m
+  /Users/mac/Documents/NEWWOWAO1/wowwao1/ios/Pods/Target\ Support\ Files/Pods-wowwao1Tests/Pods-wowwao1Tests-dummy.m

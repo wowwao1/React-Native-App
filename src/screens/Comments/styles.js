@@ -1,4 +1,4 @@
-import { StyleSheet,PixelRatio } from 'react-native';
+import { StyleSheet, PixelRatio } from 'react-native';
 const styles = StyleSheet.create({
     container: {
         height: 40,
@@ -17,5 +17,25 @@ const styles = StyleSheet.create({
         bottom: 0,
         justifyContent: 'center',
     },
+    searchSection: {
+        margin: 5,
+        borderRadius: 4,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    searchIcon: {
+        padding: 10,
+    },
+    input: {
+        flex: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 7,
+        backgroundColor: '#fff',
+        color: '#424242',
+    },
 });
-  export default styles;
+export default styles;

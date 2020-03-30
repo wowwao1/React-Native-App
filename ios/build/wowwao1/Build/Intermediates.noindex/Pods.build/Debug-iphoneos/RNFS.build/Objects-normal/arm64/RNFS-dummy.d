@@ -1,3 +1,3 @@
 dependencies: \
-  /Users/mac/Documents/wowwao1/ios/Pods/Target\ Support\ Files/RNFS/RNFS-dummy.m \
-  /Users/mac/Documents/wowwao1/ios/Pods/Target\ Support\ Files/RNFS/RNFS-prefix.pch
+  /Users/mac/Documents/NEWWOWAO1/wowwao1/ios/Pods/Target\ Support\ Files/RNFS/RNFS-dummy.m \
+  /Users/mac/Documents/NEWWOWAO1/wowwao1/ios/Pods/Target\ Support\ Files/RNFS/RNFS-prefix.pch

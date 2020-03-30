@@ -8,7 +8,6 @@ import com.geektime.rnonesignalandroid.ReactNativeOneSignalPackage;
 import io.github.elyx0.reactnativedocumentpicker.DocumentPickerPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import info.moonjava.RNPinchZoomImagePackage;
-import com.oblador.vectoricons.VectorIconsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;

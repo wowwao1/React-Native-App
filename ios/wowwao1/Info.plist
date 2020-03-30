@@ -17,11 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.7.7</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>49</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -39,16 +39,18 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>WOWWAO1 would like to access your camera for changing profile picture or upload the post on wall </string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>WOWWAO1 would like to access your location for find near by user post</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>WOWWAO1 would like to access your location for find near by user post</string>
+	<key>NSLocationUsageDescription</key>
+	<string>WOWWAO1 would like to access your location for find near by user post</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
-	<key>NSMainNibFile</key>
-	<string>LaunchScreen</string>
+	<string>WOWWAO1 would like to access your location for find near by user post</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>WOWWAO1 would like to access your gallery for changing profile picture or upload the post on wall </string>
 	<key>OneSignal_app_groups_key</key>
 	<string>group.com.app.wowwao1.onesignal</string>
-	<key>OneSignal_disable_badge_clearing</key>
-	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
@@ -59,22 +61,20 @@
 		<string>FontAwesome5_Brands.ttf</string>
 		<string>FontAwesome5_Regular.ttf</string>
 		<string>FontAwesome5_Solid.ttf</string>
-		<string>Fontisto.ttf</string>
 		<string>Foundation.ttf</string>
 		<string>Ionicons.ttf</string>
-		<string>MaterialCommunityIcons.ttf</string>
 		<string>MaterialIcons.ttf</string>
-		<string>Octicons.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
 		<string>SimpleLineIcons.ttf</string>
+		<string>Octicons.ttf</string>
 		<string>Zocial.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
+	<string>Launch Screen</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
-import { View, Text ,Image,Keyboard} from 'react-native';
+import { View, Text, Image, Keyboard } from 'react-native';
 import { DrawerActions } from 'react-navigation';
-import {Appbar} from 'react-native-paper';
+import { Appbar } from 'react-native-paper';
 import styles from './styles';
 import theme from './../../theme';
 
- class InviteFriends extends Component {
+class InviteFriends extends Component {
   static navigationOptions = {
-    drawerIcon: ({tintColor})=>( 
-        <Image source={require('../../../src/assets/images/icons/invite.png')} style={[theme.icon, {tintColor: tintColor}]} />
+    drawerIcon: ({ tintColor }) => (
+      <Image source={require('../../../src/assets/images/icons/invite.png')} style={[theme.icon, { tintColor: tintColor }]} />
     )
-}
+  }
   constructor(props) {
     super(props);
     this.state = {
@@ -25,9 +25,9 @@ import theme from './../../theme';
       <View>
         <Appbar.Header>
           <Appbar.Action icon="menu" onPress={this._openMenu} />
-          <Appbar.Content titleStyle={styles.headerTitle} title="Invite Friends"/></Appbar.Header>
-          <Text> index </Text>
-    </View>
+          <Appbar.Content titleStyle={styles.headerTitle} title="Invite Friends" /></Appbar.Header>
+        <Text> index </Text>
+      </View>
     );
   }
 }

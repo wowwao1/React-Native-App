@@ -10,7 +10,6 @@ export default StyleSheet.create({
   inputWrapper: {
     backgroundColor: 'white',
   },
-
   inputLabel: {
     paddingTop: 100,
     marginVertical: 25,
@@ -18,9 +17,7 @@ export default StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',
-   
   },
-
   icon: {
     width: 217 / 2.4,
     height: 158 / 2.4,
@@ -38,7 +35,6 @@ export default StyleSheet.create({
     paddingHorizontal: 30,
     justifyContent: 'space-between',
   },
-
   input: {
     margin: 0,
     height: CELL_SIZE,
@@ -53,8 +49,6 @@ export default StyleSheet.create({
     borderRadius: CELL_BORDER_RADIUS,
     color: '#3759b8',
     backgroundColor: '#fff',
-
-    // IOS
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -62,11 +56,8 @@ export default StyleSheet.create({
     },
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
-
-    // Android
     elevation: 3,
   },
-
   nextButton: {
     marginTop: 40,
     borderRadius: 20,
@@ -75,9 +66,7 @@ export default StyleSheet.create({
     alignSelf: 'center',
     flex: 1,
     width: 100,
-    
   },
-
   nextButtonText: {
     textAlign: 'center',
     fontSize: 16,
@@ -85,10 +74,32 @@ export default StyleSheet.create({
     fontWeight: '600',
     marginTop: 10,
   },
-  closebtn:{
-    width: 30, 
+  closebtn: {
+    width: 30,
     height: 30,
-    marginTop:50,
-    marginLeft:20
+    marginTop: 50,
+    marginLeft: 20
   },
+  footerContainer: {
+    alignItems: 'center',
+    marginTop: 55
+  },
+  requestBtn: {
+    width: 250,
+    marginHorizontal: 15,
+    alignItems: 'center',
+    marginTop: 15
+  },
+  disclaimerText: {
+    marginTop: 20,
+    fontSize: 11,
+    color: 'gray',
+    textAlign: 'center',
+    marginHorizontal: 10
+  },
+  phone: {
+    marginVertical: 10,
+    textAlign: 'center',
+    fontSize: 16
+  }
 });
