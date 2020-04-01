@@ -378,8 +378,8 @@ class Home extends Component {
 		console.log(data);
 		//userCommentList("POST", data).then(data => {
 		sendRequest("POST", data).then(data => {
-			console.log(data);
-			this.setState({ usercomments: data.data })
+		console.log(data);
+		this.setState({ usercomments: data.data })
 		})
 	}
 	deleteMyPost = async (post) => {

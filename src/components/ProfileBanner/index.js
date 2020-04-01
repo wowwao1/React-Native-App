@@ -35,7 +35,7 @@ export default class ProfileBanner extends React.Component {
                 <View style={styles.about}>
                     <Text style={styles.firstname}>{user.first_name}</Text>
                     <Text>{user.about}</Text>
-                    <Text>{user.phone_no}</Text>
+                    {/* <Text>{user.phone_no}</Text> */}
                 </View>
 
                 {

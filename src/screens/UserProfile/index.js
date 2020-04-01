@@ -121,7 +121,7 @@ class UserProfile extends React.Component {
 	getUserProfile = (userid) => {
 		let data = new FormData();
 		data.append("action", "userProfile");
-		data.append("sender_id", userid);
+		data.append("sender_id", this.props.navigation.getParam('user').id);
 		data.append("receiver_id", this.props.navigation.getParam('user').id);
 
 		//userProfile("POST", data).then(data => {
