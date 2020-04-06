@@ -24,6 +24,7 @@ import CardComponent from './../../components/CardComponent';
 import { ActionSheet } from "native-base";
 import { onIds } from './../../utils/helper';
 
+
 var DESTRUCTIVE_INDEX = 1;
 var CANCEL_INDEX = 2;
 
@@ -103,6 +104,12 @@ class Home extends Component {
 			indeterminate: true,
 			loadingMore: false,
 			noMorePosts: false,
+			location: {
+				coords: {
+					latitude: 0,
+					longitude: 0
+				}
+			}
 		
 		};
 		OneSignal.init('ee5169a7-d089-4de3-98c4-4c6bc8378925', {
@@ -143,7 +150,10 @@ class Home extends Component {
 
 	};
 
-	getNearByPost = (userid) => {
+
+
+
+	  getNearByPost = (userid) => {
 
 		console.log('getNearByPost method is called..', userid);
 
@@ -156,12 +166,15 @@ class Home extends Component {
 		data.append("page", this.state.page);
 		console.log("POST PARAM");
 		console.log(data);
-
+		// console.log("LocationUpdated **************")
+		//  this.updateUserLocation(userid);
 		//nearByPost("POST", data).then(data => {
 		sendRequest("POST", data).then(data => {
 			console.log("POST RESTPONSE")
+			
 			console.log(data)
 			if (data.status) {
+			
 				console.log("POSTs");
 				console.log(data.data);
 				let userFriends = [...this.state.posts, ...data.data];
@@ -195,13 +208,13 @@ class Home extends Component {
 		})
 	}
 
-	componentWillUnmount() {
-		// Linking.removeEventListener('url', this.handleOpenURL);
-		OneSignal.removeEventListener('received', this.onReceived);
-		OneSignal.removeEventListener('opened', this.onOpened);
-		OneSignal.removeEventListener('ids', onIds);
+	// componentWillUnmount() {
+	// 	// Linking.removeEventListener('url', this.handleOpenURL);
+	// 	OneSignal.removeEventListener('received', this.onReceived);
+	// 	OneSignal.removeEventListener('opened', this.onOpened);
+	// 	OneSignal.removeEventListener('ids', onIds);
 
-	}
+	// }
 	onReceived(notification) {
 		console.log("Notification received: ", notification.payload);
 	}
@@ -306,11 +319,15 @@ class Home extends Component {
 			}
 		})
 	}
+
 	async componentDidMount() {
+		
+		
 		let user = await getData("user");
 		user = JSON.parse(user);
 		console.log("USER is")
 		console.log("USER", user);
+		
 		this.setState({ user })
 		
 		this.getNearByPost(user.id)
@@ -321,6 +338,7 @@ class Home extends Component {
 		} else {
 			//  Linking.addEventListener('url', this.handleOpenURL);
 		}
+		
 		var providedConsent = await OneSignal.userProvidedPrivacyConsent();
 		this.setState({
 			privacyButtonTitle: `Privacy Consent: ${
@@ -345,6 +363,7 @@ class Home extends Component {
 				noMorePosts: false,
 			}, () => {
 				this.getNearByPost(user.id);
+				
 			})
 		});
 	}

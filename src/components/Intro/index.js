@@ -1,6 +1,6 @@
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { StyleSheet, View, Text, Image ,TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Text, Image ,TouchableOpacity,AsyncStorage} from 'react-native';
 import AppIntroSlider from 'react-native-app-intro-slider';
 
 const styles = StyleSheet.create({
@@ -49,6 +49,14 @@ const slides = [
 ];
  
 export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showRealApp: false,
+      loading: true,
+     
+    };
+  }
     _renderNextButton = () => {
       return (
         <View style={styles.buttonCircle}>
@@ -61,6 +69,12 @@ export default class App extends React.Component {
         </View>
       );
     };
+
+    componentDidMount() {
+      AsyncStorage.getItem('first_time').then((value) => {
+        this.setState({ showRealApp: !!value, loading: false });
+      });
+    }
     _renderDoneButton = () => {
       return (
         <TouchableOpacity style={styles.buttonCircle} onPress={this.navigateToLogin}>
@@ -75,16 +89,42 @@ export default class App extends React.Component {
     };
 
     navigateToLogin = () => {
-		this.props.navigation.navigate('AuthLoading');
-	}
+    
+    AsyncStorage.setItem('first_time', 'true').then(() => {
+      this.setState({ showRealApp: true });
+      this.props.navigation.navigate('AuthLoading');
+    });
+  }
+  
 
+  
     render() {
+      if (this.state.showRealApp) {
+        //Real Application
+        return (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 50,
+            }}>{
+              this.props.navigation.navigate('AuthLoading')
+            }
+            
+          </View>
+        );
+      } else {
+     
       return (
         <AppIntroSlider
           slides={slides}
           renderDoneButton={this._renderDoneButton}
           renderNextButton={this._renderNextButton}
         />
+      
       );
+      
     }
   }
+}

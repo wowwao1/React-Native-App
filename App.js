@@ -19,10 +19,12 @@ const theme = {
 };
 
 class App extends React.Component {
+  
   state = {
     appState: AppState.currentState
   }
-  componentDidMount() {
+  componentDidMount = () => {
+   
     AppState.addEventListener('change', this._handleAppStateChange);
   }
   componentWillUnmount() {
@@ -40,7 +42,7 @@ class App extends React.Component {
     //setAvailability("POST", data).then(data => {
     sendRequest("POST", data).then(data => {
       if (data.status) {
-
+        
         this.setState({ activateStatus: data.data, isFetching: false })
 
       }
@@ -57,14 +59,16 @@ class App extends React.Component {
     // setAvailability("POST", data).then(data => {
     sendRequest("POST", data).then(data => {
       if (data.status) {
+        
         this.setState({ activateStatus: data.data, isFetching: false })
       }
     })
   }
-
+  
   _handleAppStateChange = async (nextAppState) => {
     let user = await getData("user");
     user = JSON.parse(user);
+
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('App has come to the foreground!')
       this.setUserAvailibilty(user.id)

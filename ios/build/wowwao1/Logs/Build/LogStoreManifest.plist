@@ -6,7 +6,7 @@
 	<integer>10</integer>
 	<key>logs</key>
 	<dict>
-		<key>71383109-E3D3-4DBE-A066-7467292B9093</key>
+		<key>4CC4D149-8E93-449D-828D-6D84990DC2D1</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,7 +15,7 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>71383109-E3D3-4DBE-A066-7467292B9093.xcactivitylog</string>
+			<string>4CC4D149-8E93-449D-828D-6D84990DC2D1.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
@@ -32,13 +32,13 @@
 			<key>signature</key>
 			<string>Building workspace wowwao1 with scheme wowwao1 and configuration Debug</string>
 			<key>timeStartedRecording</key>
-			<real>607012471.97037995</real>
+			<real>607860016.70328903</real>
 			<key>timeStoppedRecording</key>
-			<real>607012562.155671</real>
+			<real>607860136.54944801</real>
 			<key>title</key>
 			<string>Building workspace wowwao1 with scheme wowwao1 and configuration Debug</string>
 			<key>uniqueIdentifier</key>
-			<string>71383109-E3D3-4DBE-A066-7467292B9093</string>
+			<string>4CC4D149-8E93-449D-828D-6D84990DC2D1</string>
 		</dict>
 	</dict>
 </dict>
