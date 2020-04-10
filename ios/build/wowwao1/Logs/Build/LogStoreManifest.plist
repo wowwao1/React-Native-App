@@ -6,7 +6,7 @@
 	<integer>10</integer>
 	<key>logs</key>
 	<dict>
-		<key>4CC4D149-8E93-449D-828D-6D84990DC2D1</key>
+		<key>309036E1-49A5-4DF0-88CB-D335FB57A134</key>
 		<dict>
 			<key>className</key>
 			<string>IDECommandLineBuildLog</string>
@@ -15,13 +15,13 @@
 			<key>domainType</key>
 			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
 			<key>fileName</key>
-			<string>4CC4D149-8E93-449D-828D-6D84990DC2D1.xcactivitylog</string>
+			<string>309036E1-49A5-4DF0-88CB-D335FB57A134.xcactivitylog</string>
 			<key>hasPrimaryLog</key>
 			<true/>
 			<key>primaryObservable</key>
 			<dict>
 				<key>highLevelStatus</key>
-				<string>W</string>
+				<string>E</string>
 			</dict>
 			<key>schemeIdentifier-containerName</key>
 			<string>wowwao1 project</string>
@@ -32,13 +32,13 @@
 			<key>signature</key>
 			<string>Building workspace wowwao1 with scheme wowwao1 and configuration Debug</string>
 			<key>timeStartedRecording</key>
-			<real>607860016.70328903</real>
+			<real>608127673.02849305</real>
 			<key>timeStoppedRecording</key>
-			<real>607860136.54944801</real>
+			<real>608127758.73828495</real>
 			<key>title</key>
 			<string>Building workspace wowwao1 with scheme wowwao1 and configuration Debug</string>
 			<key>uniqueIdentifier</key>
-			<string>4CC4D149-8E93-449D-828D-6D84990DC2D1</string>
+			<string>309036E1-49A5-4DF0-88CB-D335FB57A134</string>
 		</dict>
 	</dict>
 </dict>

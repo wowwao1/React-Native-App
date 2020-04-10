@@ -121,15 +121,17 @@ class UserProfile extends React.Component {
 	getUserProfile = (userid) => {
 		let data = new FormData();
 		data.append("action", "userProfile");
-		data.append("sender_id", this.props.navigation.getParam('user').id);
-		data.append("receiver_id", this.props.navigation.getParam('user').id);
+		data.append("sender_id",userid)
+		data.append("receiver_id",this.props.navigation.getParam('user').id);
 
 		//userProfile("POST", data).then(data => {
 		sendRequest("POST", data).then(data => {
 			console.log("Userdata")
 			console.log(data);
 			this.setState({ isLoading: false })
+			if (data.status){
 			this.setState({ user: data.data, status: this.getstatus(data.data.is_friend), followstatus: this.getFollowstatus(data.data.is_follow) })
+			}
 		})
 	}
 
@@ -189,7 +191,7 @@ class UserProfile extends React.Component {
 		} else if (is_friend == 'y') {
 			return "Unfriend";
 		} else {
-			return "Request Sent";
+			return "Requested";
 		}
 	}
 
@@ -288,9 +290,10 @@ class UserProfile extends React.Component {
 			data.append("request_action", "Add");
 			this.sendFriendRequestNotification(user)
 		}
-		else {
+		else if (user.is_friend == 'y') {
 			data.append("request_action", "Unfriend")
 		}
+		
 		console.log(data);
 		// userRequest("POST", data).then(data => {
 		sendRequest("POST", data).then(data => {
