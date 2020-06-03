@@ -20,6 +20,8 @@ import PostImagePreview from './../../components/PostImagePreview';
 import { ActionSheet } from 'native-base';
 import * as Picker from 'expo-image-picker';
 import { checkField, showToastMessage } from './../../utils/helper';
+import { RNVoiceRecorder } from 'react-native-voice-recorder';
+import CardViewContainer from './CardViewContainer';
 const DismissKeyboard = ({ children }) => (
 	<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 		{children}
@@ -45,7 +47,9 @@ class NewPost extends Component {
 			isLoading: false,
 			ImageSource: null,
 			editMode: false,
-			message: ''
+			message: '',
+			path : '',
+			isRecordingDone: false
 		};
 	}
 
@@ -63,7 +67,37 @@ class NewPost extends Component {
 			}
 		)
 	}
+	recordVoice = () => {
+        //alert('yessss');
+        RNVoiceRecorder.Record({
+			
+            onDone: (path) => {
+                //this.RNVoiceRecorder();
+                this.setState({
+					path:path,
+					isRecordingDone: true
+                });
+                console.log('Recordin first path ===>'+path);
+            },
+            onCancel: () => {
+         
+            }
+        })
+    }
 
+    playRecording = () =>{
+        RNVoiceRecorder.Play({
+			
+            path: this.state.path,
+            onDone: (path) => {
+                
+        
+            },
+            onCancel: () => {
+        
+            }
+        })
+    }
 	onImageSourceSelection = async (source) => {
 		if (source == "Camera") {
 			let result = await Picker.launchCameraAsync({
@@ -153,7 +187,58 @@ class NewPost extends Component {
 		})
 	}
 
+	// handlePost = async() => {
+
+	// 	const data = new FormData();
+	// 	data.append("imageFileToUpload", {
+	// 		name: `${Date.now()}.wav`,
+	// 		type: "audio/wav",
+	// 		uri: Platform.OS === "android" ? this.state.path : this.state.path.replace("file://", "")
+	// 	});
+
+	// 	let param = {
+	// 		method: "POST",
+	// 		headers: {
+	// 		  Accept: 'application/json'
+	// 		},
+	// 		body: data
+	// 	  };
+		  
+	// 	  try {
+	// 		let res = await fetch("https://5be85750bd21.ngrok.io/index.php", param);
+	// 		res= await res.json();
+	// 		console.log("REsponse");
+	// 		console.log(res);
+	// 	  } catch (error) {
+	// 		  console.log("Error", error);
+	// 	  }
+		
+	// }
+
 	handlePost = async () => {
+		const data = new FormData();
+		data.append("imageFileToUpload", {
+			name: `${Date.now()}.wav`,
+			type: "audio/wav",
+			uri: Platform.OS === "android" ? this.state.path : this.state.path.replace("file://", "")
+		});
+
+		let param = {
+			method: "POST",
+			headers: {
+			  Accept: 'application/json'
+			},
+			body: data
+		  };
+		  
+		  try {
+			let res = await fetch("https://5be85750bd21.ngrok.io/index.php", param);
+			res= await res.json();
+			console.log("REsponse");
+			console.log(res);
+		  } catch (error) {
+			  console.log("Error", error);
+		  }
 		let user = await getData("user");
 		if (this.validatePost()) {
 
@@ -223,6 +308,9 @@ class NewPost extends Component {
 		//data.append("post_image", "nuxxxll");
 		return data;
 	};
+
+
+
 	validatePost = () => {
 		const description_text = checkField(this.state.description);
 		if (description_text && this.state.avatarSource == null) {
@@ -268,6 +356,11 @@ class NewPost extends Component {
 			avatarSource: null
 		})
 	}
+	onVoiceCancel = () =>{
+		this.setState({
+			isRecordingDone: false 		
+		})
+	}
 
 	render() {
 		return (
@@ -293,6 +386,7 @@ class NewPost extends Component {
 							value={this.state.description}
 							onChangeText={description => this.setState({ description })}>
 						</TextInput>
+						<CardViewContainer isRecordingDone={this.state.isRecordingDone} recordVoice={()=>this.recordVoice()} playRecording={()=>this.playRecording()}/>
 						<TouchableOpacity
 							onPress={() => this.showActionSheet()}
 							style={styles.profileCameraImage} >

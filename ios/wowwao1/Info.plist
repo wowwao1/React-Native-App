@@ -49,6 +49,10 @@
 	<string>WOWWAO1 would like to access your location for find near by user post</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>WOWWAO1 would like to access your gallery for changing profile picture or upload the post on wall </string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>WOWWAO1 would like to access your microphone for recording voice and upload the post on wall </string>
+	<key>onesignal_disable_badge_clearing</key>
+	<true/>
 	<key>OneSignal_app_groups_key</key>
 	<string>group.com.app.wowwao1.onesignal</string>
 	<key>UIAppFonts</key>
@@ -85,7 +89,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>onesignal_disable_badge_clearing</key>
-	<true/>
 </dict>
 </plist>

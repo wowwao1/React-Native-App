@@ -128,7 +128,7 @@ end
 
 
   pod 'RNPinchZoomImage', :path => '../node_modules/react-native-pinch-zoom-image'
-
+  
   #Permissions
   permissions_path = '../node_modules/react-native-permissions/ios'
   
@@ -137,7 +137,7 @@ end
   pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary.podspec"
   pod 'Permission-LocationAlways', :path => "#{permissions_path}/LocationAlways.podspec"
   pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse.podspec"
-"
+
 
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
@@ -149,6 +149,7 @@ end
   end
 
   use_native_modules!
+  pod 'RNVoiceRecorder', :path => '../node_modules/react-native-voice-recorder/ios'
   use_unimodules!
 end
 target 'OneSignalNotificationServiceExtension' do

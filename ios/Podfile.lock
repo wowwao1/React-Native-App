@@ -43,6 +43,8 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.4)
+  - IQAudioRecorderController (1.2.3):
+    - SCSiriWaveformView
   - libwebp (1.1.0):
     - libwebp/demux (= 1.1.0)
     - libwebp/mux (= 1.1.0)
@@ -301,10 +303,14 @@ PODS:
     - React
   - RNVectorIcons (6.6.0):
     - React
+  - RNVoiceRecorder (1.0.2):
+    - IQAudioRecorderController
+    - React
   - RSKImageCropper (2.2.3)
-  - SDWebImage (5.6.1):
-    - SDWebImage/Core (= 5.6.1)
-  - SDWebImage/Core (5.6.1)
+  - SCSiriWaveformView (1.1.1)
+  - SDWebImage (5.7.3):
+    - SDWebImage/Core (= 5.7.3)
+  - SDWebImage/Core (5.7.3)
   - SDWebImageWebPCoder (0.2.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.0)
@@ -381,6 +387,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - RNVoiceRecorder (from `../node_modules/react-native-voice-recorder/ios`)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - UMBarCodeScannerInterface (from `../node_modules/unimodules-barcode-scanner-interface/ios`)
   - UMCameraInterface (from `../node_modules/unimodules-camera-interface/ios`)
@@ -401,10 +408,12 @@ SPEC REPOS:
     - boost-for-react-native
     - DoubleConversion
     - glog
+    - IQAudioRecorderController
     - libwebp
     - OneSignal
     - QBImagePickerController
     - RSKImageCropper
+    - SCSiriWaveformView
     - SDWebImage
     - SDWebImageWebPCoder
 
@@ -507,6 +516,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
+  RNVoiceRecorder:
+    :path: "../node_modules/react-native-voice-recorder/ios"
   UMAppLoader:
     :path: "../node_modules/unimodules-app-loader/ios"
   UMBarCodeScannerInterface:
@@ -550,6 +561,7 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: 5a764c60abdc3336a213e5310c40b74741f32839
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1de0bb937dccdc981596d3b5825ebfb765017ded
+  IQAudioRecorderController: 69a67c2e0b87bd8746cbb4de175fd7a0bf820009
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   OneSignal: 30b6e03a1f14169c4313e301a7b7bdf467b5a575
   Permission-Camera: 907d26263ce6cf10983b07e8801a6939f8b74567
@@ -592,8 +604,10 @@ SPEC CHECKSUMS:
   RNReanimated: 6abbbae2e5e72609d85aabd92a982a94566885f1
   RNScreens: f28b48b8345f2f5f39ed6195518291515032a788
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
+  RNVoiceRecorder: e7a122035326116416b02c1def1e4294d6077893
   RSKImageCropper: a446db0e8444a036b34f3c43db01b2373baa4b2a
-  SDWebImage: 7edb9c3ea661e77a66661f7f044de8c1b55d1120
+  SCSiriWaveformView: 15b9dd6f94c7536e2032b34a35c6ff74d38c7411
+  SDWebImage: 97351f6582ceca541ea294ba66a1fcb342a331c2
   SDWebImageWebPCoder: 947093edd1349d820c40afbd9f42acb6cdecd987
   UMAppLoader: 70387114be35df5f90cd1f172edfb7a2f150e65a
   UMBarCodeScannerInterface: 9dc692b87e5f20fe277fa57aa47f45d418c3cc6c
@@ -610,6 +624,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: cb890c79c63885504ddc0efd7a7d01481760aca2
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
 
-PODFILE CHECKSUM: 615d7056db7169639f2729cd9b7b5cf1f5b4d6f2
+PODFILE CHECKSUM: 05521c651134682f3a9f48ab6a9a38dc38940658
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.9.2
