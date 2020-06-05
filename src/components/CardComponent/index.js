@@ -6,13 +6,14 @@ import { Card, CardItem, Thumbnail, Body, Left, Right, Button, Icon } from 'nati
 import Autolink from 'react-native-autolink';
 import { withNavigation } from 'react-navigation';
 import { convertUnicode, getData } from './../../utils/helper';
-import { InstagramProvider, ElementContainer } from '@postillon/react-native-instagram-zoomable';
+import { InstagramProvider, ElementContainer }from '@postillon/react-native-instagram-zoomable';
+import NewAudioPlayer from './../NewAudioPlayer';
 import styles from './styles';
 
 class CardCompnent extends Component {
 
     state = {
-        tapped: false
+        tapped: false,
     }
 
     navigateToUserprofile = async (user) => {
@@ -54,8 +55,10 @@ class CardCompnent extends Component {
         )
     }
     render() {
+        let audio = null;
         const { item, showActionSheet, nearBy } = this.props;
         let url = item.image.length > 0 ? item.image[0].path : null;
+        if(item.audio) audio = <NewAudioPlayer src={item.audio}/>
         return (
             <Card>
                 <CardItem>
@@ -93,8 +96,8 @@ class CardCompnent extends Component {
                         </Button>
                     </Right>
                 </CardItem>
-                {item.post_text ? <CardItem>
-                    <Body>
+                {item.post_text ? <View style={{ flexDirection: 'column' }}>
+                    <View style={{ paddingVertical: 10, paddingLeft: 10 }}>
                         <Autolink
                             numberOfLines={0}
                             ellipsizeMode={'tail'}
@@ -103,8 +106,11 @@ class CardCompnent extends Component {
                             mention="twitter"
                             phone={true}>
                         </Autolink>
-                    </Body>
-                </CardItem> : null
+                    </View>
+                    <View>
+                    { audio }
+                    </View>
+                </View> : null
                 }
                 {
                     item.image.length > 0 && item.image[0].path ?
@@ -124,20 +130,6 @@ class CardCompnent extends Component {
                         </View>
                         : this.renderActions(item)
                 }
-                {/* <CardItem style={{ height: 40 }}>
-                    <Left>
-                        <Button transparent onPress={() => onLikePost(item)}>
-                            <Icon name={(item.is_liked === 'y') ?
-                                "ios-heart" :
-                                "ios-heart-empty"} style={styles.heart} />
-                            <Text style={styles.likeCmnt}>{item.total_like}</Text>
-                        </Button>
-                        <Button transparent onPress={() => navigateComment(item)}>
-                            <EvilIcons name="comment" size={30} style={styles.comment} />
-                            <Text style={styles.likeCmnt}>{item.total_comment}</Text>
-                        </Button>
-                    </Left>
-                </CardItem> */}
             </Card>
         );
     }

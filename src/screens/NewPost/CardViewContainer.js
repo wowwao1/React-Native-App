@@ -42,7 +42,7 @@ export default class CardViewContainer extends Component {
             {/*<Subheading style={styles.recordtime}>00:00:15</Subheading>*/}
           </View>
         </View>
-        { this.props.isRecordingDone && <TouchableOpacity onPress={playRecording}><Text style={styles.playrecord}>CLICK TO PLAYBACK RECORDING</Text></TouchableOpacity>}
+        {/* { this.props.isRecordingDone && <TouchableOpacity onPress={playRecording}><Text style={styles.playrecord}>CLICK TO PLAYBACK RECORDING</Text></TouchableOpacity>} */}
       </KeyboardAvoidingView>
     );
   }

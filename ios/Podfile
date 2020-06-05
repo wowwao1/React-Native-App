@@ -52,6 +52,8 @@ target 'wowwao1' do
 
   pod 'react-native-onesignal', :path => '../node_modules/react-native-onesignal'
 
+  pod 'RNSound', :path => '../node_modules/react-native-sound'
+
 end
   Pod::Spec.new do |spec|
   spec.name = 'Folly'

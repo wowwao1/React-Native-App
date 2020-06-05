@@ -1,27 +1,26 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
-
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#DCDCDC',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#DCDCDC",
+    backgroundColor: "#fff",
     borderBottomWidth: 0.7,
     marginTop: 20,
     height: "100%",
     flex: 1,
-    position: 'relative'
+    position: "relative",
   },
   pic: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderRadius: 30,
     width: 45,
     height: 45,
     marginLeft: 10,
-    marginTop: 20
+    marginTop: 20,
   },
   pic1: {
-    flexDirection: 'row',
+    flexDirection: "row",
     width: 58,
     height: 58,
     borderRadius: 50,
@@ -29,50 +28,47 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: "#1778F2",
     marginLeft: -52,
-    marginTop: 10
+    marginTop: 10,
   },
   progress: {
     margin: 10,
     marginLeft: -52,
     marginTop: 14,
-
   },
 
   nameTxt1: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginLeft: 80,
-    fontWeight: '400',
-    color: '#222',
+    fontWeight: "400",
+    color: "#222",
     fontSize: 14,
-    width: 'auto',
+    width: "auto",
     marginTop: -40,
     flex: 1,
   },
   statusdiff: {
-    alignSelf: 'center',
-    position: 'absolute',
+    alignSelf: "center",
+    position: "absolute",
     fontSize: 10,
     marginTop: 15,
-    marginLeft: 20
+    marginLeft: 20,
   },
   publicPost: {
     height: 18,
     width: 18,
-
   },
 
   dateTxt: {
-    flexDirection: 'row',
-    fontWeight: '100',
-    color: '#606080',
+    flexDirection: "row",
+    fontWeight: "100",
+    color: "#606080",
     fontSize: 9,
     marginLeft: 80,
-    marginTop: 'auto',
-
+    marginTop: "auto",
   },
   postTextSize: {
-    fontFamily: 'fontAwesome',
-    width: 'auto',
+    fontFamily: "fontAwesome",
+    width: "auto",
     marginLeft: 10,
     paddingTop: 20,
     paddingBottom: 5,
@@ -82,31 +78,29 @@ const styles = StyleSheet.create({
   postImage: {
     //minWidth: '100%',
     aspectRatio: 1,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     height: "100%",
     width: "100%",
     //flex:0.5
   },
   combine: {
-
-    position: 'absolute',
+    position: "absolute",
     right: 0,
-    top: 0
+    top: 0,
   },
   verticalImg: {
     right: 20,
-
   },
   privacyImage: {
     right: 40,
-    top: 20
+    top: 20,
   },
   userPost: {
-    textAlign: 'center'
+    textAlign: "center",
   },
   iconRow: {
-    flexDirection: 'row',
-    alignSelf: 'stretch',
+    flexDirection: "row",
+    alignSelf: "stretch",
     marginTop: 10,
     paddingVertical: 5,
     paddingHorizontal: 15,
@@ -118,15 +112,15 @@ const styles = StyleSheet.create({
   pulstab: {
     height: 70,
     width: 70,
-    resizeMode: 'contain'
+    resizeMode: "contain",
   },
   spinnerTextStyle: {
-    color: '#FFF'
+    color: "#FFF",
   },
   norecordImage: {
-    width: '100%',
-    height: '100%',
-    alignSelf: 'center',
+    width: "100%",
+    height: "100%",
+    alignSelf: "center",
     //marginVertical:10
   },
   status_indicator: {
@@ -137,11 +131,18 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   online: {
-    backgroundColor: '#1FF31F'
+    backgroundColor: "#1FF31F",
   },
   profileAndIndiactor: {
-    flexDirection: 'row'
-  }
-
+    flexDirection: "row",
+  },
+  userVoicePost: {
+    aspectRatio: 1,
+    resizeMode: "contain",
+    height: "70%",
+    width: "20%",
+    alignSelf: "center",
+    margin: 10,
+  },
 });
 export default styles;

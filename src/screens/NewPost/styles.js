@@ -151,5 +151,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 80,
   },
+  stopImg: {
+    alignSelf: "flex-end",
+    height: 40,
+    width: 40,
+ 
+  },
 });
 export default styles;

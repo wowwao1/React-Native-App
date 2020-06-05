@@ -301,6 +301,11 @@ PODS:
     - React
   - RNScreens (1.0.0-alpha.23):
     - React
+  - RNSound (0.11.0):
+    - React
+    - RNSound/Core (= 0.11.0)
+  - RNSound/Core (0.11.0):
+    - React
   - RNVectorIcons (6.6.0):
     - React
   - RNVoiceRecorder (1.0.2):
@@ -386,6 +391,7 @@ DEPENDENCIES:
   - RNPinchZoomImage (from `../node_modules/react-native-pinch-zoom-image`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNSound (from `../node_modules/react-native-sound`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNVoiceRecorder (from `../node_modules/react-native-voice-recorder/ios`)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
@@ -514,6 +520,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSound:
+    :path: "../node_modules/react-native-sound"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   RNVoiceRecorder:
@@ -603,6 +611,7 @@ SPEC CHECKSUMS:
   RNPinchZoomImage: 3a67ca4b24696662e12ec1f3bb837ca181d58423
   RNReanimated: 6abbbae2e5e72609d85aabd92a982a94566885f1
   RNScreens: f28b48b8345f2f5f39ed6195518291515032a788
+  RNSound: da030221e6ac7e8290c6b43f2b5f2133a8e225b0
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   RNVoiceRecorder: e7a122035326116416b02c1def1e4294d6077893
   RSKImageCropper: a446db0e8444a036b34f3c43db01b2373baa4b2a
@@ -624,6 +633,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: cb890c79c63885504ddc0efd7a7d01481760aca2
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
 
-PODFILE CHECKSUM: 05521c651134682f3a9f48ab6a9a38dc38940658
+PODFILE CHECKSUM: 02f39f6c9c2b33b5c732e7c6fbd3b64556812051
 
 COCOAPODS: 1.9.2
