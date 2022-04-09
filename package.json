@@ -21,7 +21,7 @@
     "expo-image-picker": "^8.1.0",
     "expo-location": "^8.1.0",
     "html-entities": "^1.2.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "native-base": "^2.13.12",
     "react": "16.9.0",
     "react-emoji-render": "^1.2.0",
