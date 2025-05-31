@@ -30,11 +30,15 @@ goog.require('shaka.util.TextParser');
 /**
  * @constructor
  * @implements {shaka.extern.TextParser}
+ * @export
  */
 shaka.text.VttTextParser = function() {};
 
 
-/** @override */
+/**
+ * @override
+ * @export
+ */
 shaka.text.VttTextParser.prototype.parseInit = function(data) {
   goog.asserts.assert(false, 'VTT does not have init segments');
 };
@@ -42,6 +46,7 @@ shaka.text.VttTextParser.prototype.parseInit = function(data) {
 
 /**
  * @override
+ * @export
  * @throws {shaka.util.Error}
  */
 shaka.text.VttTextParser.prototype.parseMedia = function(data, time) {
@@ -456,4 +461,7 @@ shaka.text.TextEngine.registerParser(
 
 shaka.text.TextEngine.registerParser(
     'text/vtt; codecs="vtt"',
+    shaka.text.VttTextParser);
+shaka.text.TextEngine.registerParser(
+    'text/vtt; codecs="wvtt"',
     shaka.text.VttTextParser);

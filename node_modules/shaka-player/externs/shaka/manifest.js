@@ -293,6 +293,7 @@ shaka.extern.GetSegmentReferenceFunction;
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
+ *   pixelAspectRatio: (string|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
@@ -307,6 +308,7 @@ shaka.extern.GetSegmentReferenceFunction;
  *   emsgSchemeIdUris: ?Array.<string>,
  *   roles: !Array.<string>,
  *   channelsCount: ?number,
+ *   audioSamplingRate: ?number,
  *   closedCaptions: Map.<string, string>
  * }}
  *
@@ -358,6 +360,9 @@ shaka.extern.GetSegmentReferenceFunction;
  * @property {(number|undefined)} frameRate
  *   <i>Video streams only.</i> <br>
  *   The Stream's framerate in frames per second
+ * @property {(string|undefined)} pixelAspectRatio
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's pixel aspect ratio
  * @property {(number|undefined)} bandwidth
  *   <i>Audio and video streams only.</i> <br>
  *   The stream's required bandwidth in bits per second.
@@ -404,6 +409,8 @@ shaka.extern.GetSegmentReferenceFunction;
  *   e.g. 'main', 'caption', or 'commentary'.
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content.
  * @property {Map.<string, string>} closedCaptions
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code

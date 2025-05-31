@@ -105,16 +105,17 @@ class ConfirmationCodeInput extends PureComponent<Props, State> {
   };
 
   renderSymbol(symbol: string, index: number) {
-    const { maskSymbol } = this.props;
+    const { maskSymbol, maskSymbolProps } = this.props;
     const lastIndex = this.getLastIndex();
 
     if (maskSymbol && symbol) {
       return (
         <MaskSymbol
-          isLast={index === lastIndex}
           delay={500}
-          mask={maskSymbol}
+          {...maskSymbolProps}
           symbol={symbol}
+          mask={maskSymbol}
+          isLast={index === lastIndex}
         />
       );
     }

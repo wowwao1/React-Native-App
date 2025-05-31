@@ -1,7 +1,7 @@
 //
 // RSKInternalUtility.h
 //
-// Copyright (c) 2015-present Ruslan Skorb, http://ruslanskorb.com/
+// Copyright © 2015-present Ruslan Skorb. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_HEADER_AUDIT_BEGIN(nullability, sendability)
+
 /**
  Returns a localized version of the string designated by the specified key and residing in the RSKImageCropper table.
  
@@ -39,11 +41,13 @@ FOUNDATION_EXPORT NSString * RSKLocalizedString(NSString *key, NSString *comment
 /**
  Returns the NSBundle object for returning localized strings.
  
- @return The NSBundle object for returning localized strings.
+ @return The NSBundle object for returning localized strings, or nil if the bundle is not found on the system.
  
  @discussion We assume a convention of a bundle named RSKImageCropperStrings.bundle, otherwise we
  return the bundle associated with the RSKInternalUtility class.
  */
-+ (NSBundle *)bundleForStrings;
++ (nullable NSBundle *)bundleForStrings;
 
 @end
+
+NS_HEADER_AUDIT_END(nullability, sendability)

@@ -90,6 +90,8 @@ shaka.extern.StoredContent;
  *   The total size of all stored segments, in bytes.
  * @property {number} expiration
  *   The license expiration, in milliseconds; or Infinity if not applicable.
+ *   Note that upon JSON serialization, Infinity becomes null, and must be
+ *   converted back upon loading from storage.
  * @property {!Array.<shaka.extern.PeriodDB>} periods
  *   The Periods that are stored.
  * @property {!Array.<string>} sessionIds
@@ -126,6 +128,7 @@ shaka.extern.PeriodDB;
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
+ *   pixelAspectRatio: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   label: ?string,
@@ -155,6 +158,8 @@ shaka.extern.PeriodDB;
  *   The codecs of the stream.
  * @property {(number|undefined)} frameRate
  *   The Stream's framerate in frames per second.
+ * @property {(string|undefined)} pixelAspectRatio
+ *   The Stream's pixel aspect ratio
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language

@@ -37,6 +37,12 @@ const OPERATIONS = {
   asin: single(a => Math.asin(a)),
   atan: single(a => Math.atan(a)),
   exp: single(a => Math.exp(a)),
+  round: single(a => Math.round(a)),
+  abs: single(a => Math.abs(a)),
+  ceil: single(a => Math.ceil(a)),
+  floor: single(a => Math.floor(a)),
+  max: reduce((a,b) => Math.max(a, b)),
+  min: reduce((a,b) => Math.min(a, b)),
 
   // logical
   and: reduceFrom((a, b) => a && b, true),
@@ -61,12 +67,29 @@ class AnimatedOperator extends AnimatedNode {
   _operation;
 
   constructor(operator, input) {
+    invariant(
+      typeof operator === 'string',
+      `Reanimated: Animated.operator node first argument should be of type String, but got: ${operator}`
+    );
+    invariant(
+      input.every(
+        el =>
+          el instanceof AnimatedNode ||
+          typeof el === 'string' ||
+          typeof el === 'number'
+      ),
+      `Reanimated: Animated.operator node second argument should be one or more of type AnimatedNode, String or Number but got ${input}`
+    );
     super(
-      { type: 'op', op: operator, input: input.map(n => n.__nodeID) },
+      { type: 'op', op: operator, input },
       input
     );
     this._op = operator;
     this._input = input;
+  }
+
+  toString() {
+    return `AnimatedOperator, id: ${this.__nodeID}`;
   }
 
   __onEvaluate() {

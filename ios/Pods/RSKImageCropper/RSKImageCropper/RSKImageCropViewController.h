@@ -1,7 +1,7 @@
 //
 // RSKImageCropViewController.h
 //
-// Copyright (c) 2014-present Ruslan Skorb, http://ruslanskorb.com/
+// Copyright © 2014-present Ruslan Skorb. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 #import <UIKit/UIKit.h>
 
-NS_ASSUME_NONNULL_BEGIN
+NS_HEADER_AUDIT_BEGIN(nullability, sendability)
 
 @protocol RSKImageCropViewControllerDataSource;
 @protocol RSKImageCropViewControllerDelegate;
@@ -38,6 +38,7 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
     RSKImageCropModeCustom
 };
 
+NS_SWIFT_UI_ACTOR
 @interface RSKImageCropViewController : UIViewController
 
 /**
@@ -58,7 +59,7 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
 /**
  Zooms to a specific area of the image so that it is visible.
  
- @param rect A rectangle defining an area of the image.
+ @param rect A rectangle defining an area of the image. The rectangle should be in the coordinate space of the image crop view controller's view.
  @param animated YES if the scrolling should be animated, NO if it should be immediate.
  */
 - (void)zoomToRect:(CGRect)rect animated:(BOOL)animated;
@@ -174,6 +175,16 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
 @property (assign, nonatomic) BOOL applyMaskToCroppedImage;
 
 /**
+ A Boolean value that controls whether the image bounces past the edge of the movement rect and back again. Default value is `YES`.
+ */
+@property (assign, nonatomic) BOOL bounces;
+
+/**
+ A Boolean value that determines whether the image scaling is animated when the scaling exceeds the maximum or minimum limits. Default value is `YES`.
+ */
+@property (assign, nonatomic) BOOL bouncesZoom;
+
+/**
  A Boolean value that controls whether the rotaion gesture is enabled. Default value is `NO`.
  
  @discussion To support the rotation when `cropMode` is `RSKImageCropModeCustom` you must implement the data source method `imageCropViewControllerCustomMovementRect:`.
@@ -225,29 +236,29 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
 @property (assign, nonatomic) CGFloat portraitSquareMaskRectInnerEdgeInset;
 
 /**
- The vertical space between the top of the 'Move and Scale' label and the top of the crop view in portrait orientation. Default value is `64.0f`.
+ The vertical space between the top of the 'Move and Scale' label and the top of the crop view's safe area in portrait orientation. Default value is `44.0f`.
  */
-@property (assign, nonatomic) CGFloat portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
+@property (assign, nonatomic) CGFloat portraitMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace;
 
 /**
- The vertical space between the bottom of the crop view and the bottom of the 'Cancel' button in portrait orientation. Default value is `21.0f`.
+ The vertical space between the bottom of the crop view's safe area and the bottom of the 'Cancel' button in portrait orientation. Default value is `21.0f`.
  */
-@property (assign, nonatomic) CGFloat portraitCropViewBottomAndCancelButtonBottomVerticalSpace;
+@property (assign, nonatomic) CGFloat portraitCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace;
 
 /**
- The vertical space between the bottom of the crop view and the bottom of the 'Choose' button in portrait orientation. Default value is `21.0f`.
+ The vertical space between the bottom of the crop view's safe area and the bottom of the 'Choose' button in portrait orientation. Default value is `21.0f`.
  */
-@property (assign, nonatomic) CGFloat portraitCropViewBottomAndChooseButtonBottomVerticalSpace;
+@property (assign, nonatomic) CGFloat portraitCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace;
 
 /**
- The horizontal space between the leading of the 'Cancel' button and the leading of the crop view in portrait orientation. Default value is `13.0f`.
+ The horizontal space between the leading of the 'Cancel' button and the leading of the crop view's safe area in portrait orientation. Default value is `13.0f`.
  */
-@property (assign, nonatomic) CGFloat portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
+@property (assign, nonatomic) CGFloat portraitCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace;
 
 /**
- The horizontal space between the trailing of the crop view and the trailing of the 'Choose' button in portrait orientation. Default value is `13.0f`.
+ The horizontal space between the trailing of the crop view's safe area and the trailing of the 'Choose' button in portrait orientation. Default value is `13.0f`.
  */
-@property (assign, nonatomic) CGFloat portraitCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
+@property (assign, nonatomic) CGFloat portraitCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace;
 
 /**
  The inset of the circle mask rect's area within the crop view's area in landscape orientation. Default value is `45.0f`.
@@ -260,35 +271,36 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
 @property (assign, nonatomic) CGFloat landscapeSquareMaskRectInnerEdgeInset;
 
 /**
- The vertical space between the top of the 'Move and Scale' label and the top of the crop view in landscape orientation. Default value is `12.0f`.
+ The vertical space between the top of the 'Move and Scale' label and the top of the crop view's safe area in landscape orientation. Default value is `12.0f`.
  */
-@property (assign, nonatomic) CGFloat landscapeMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
+@property (assign, nonatomic) CGFloat landscapeMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace;
 
 /**
- The vertical space between the bottom of the crop view and the bottom of the 'Cancel' button in landscape orientation. Default value is `12.0f`.
+ The vertical space between the bottom of the crop view's safe area and the bottom of the 'Cancel' button in landscape orientation. Default value is `12.0f`.
  */
-@property (assign, nonatomic) CGFloat landscapeCropViewBottomAndCancelButtonBottomVerticalSpace;
+@property (assign, nonatomic) CGFloat landscapeCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace;
 
 /**
- The vertical space between the bottom of the crop view and the bottom of the 'Choose' button in landscape orientation. Default value is `12.0f`.
+ The vertical space between the bottom of the crop view's safe area and the bottom of the 'Choose' button in landscape orientation. Default value is `12.0f`.
  */
-@property (assign, nonatomic) CGFloat landscapeCropViewBottomAndChooseButtonBottomVerticalSpace;
+@property (assign, nonatomic) CGFloat landscapeCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace;
 
 /**
- The horizontal space between the leading of the 'Cancel' button and the leading of the crop view in landscape orientation. Default value is `13.0f`.
+ The horizontal space between the leading of the 'Cancel' button and the leading of the crop view's safe area in landscape orientation. Default value is `13.0f`.
  */
-@property (assign, nonatomic) CGFloat landscapeCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
+@property (assign, nonatomic) CGFloat landscapeCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace;
 
 /**
- The horizontal space between the trailing of the crop view and the trailing of the 'Choose' button in landscape orientation. Default value is `13.0f`.
+ The horizontal space between the trailing of the crop view's safe area and the trailing of the 'Choose' button in landscape orientation. Default value is `13.0f`.
  */
-@property (assign, nonatomic) CGFloat landscapeCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
+@property (assign, nonatomic) CGFloat landscapeCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace;
 
 @end
 
 /**
  The `RSKImageCropViewControllerDataSource` protocol is adopted by an object that provides a custom rect and a custom path for the mask and a custom movement rect for the image.
  */
+NS_SWIFT_UI_ACTOR
 @protocol RSKImageCropViewControllerDataSource <NSObject>
 
 /**
@@ -323,6 +335,7 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
 /**
  The `RSKImageCropViewControllerDelegate` protocol defines messages sent to a image crop view controller delegate when crop image was canceled or the original image was cropped.
  */
+NS_SWIFT_UI_ACTOR
 @protocol RSKImageCropViewControllerDelegate <NSObject>
 
 /**
@@ -349,4 +362,4 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
 
 @end
 
-NS_ASSUME_NONNULL_END
+NS_HEADER_AUDIT_END(nullability, sendability)

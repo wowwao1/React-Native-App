@@ -51,7 +51,7 @@ shaka.util.ConfigUtils.mergeConfigObjects =
 
     // The order of these checks is important.
     if (!ignoreKeys && !(k in template)) {
-      shaka.log.error('Invalid config, unrecognized key ' + subPath);
+      shaka.log.alwaysError('Invalid config, unrecognized key ' + subPath);
       isValid = false;
     } else if (source[k] === undefined) {
       // An explicit 'undefined' value causes the key to be deleted from the
@@ -80,15 +80,18 @@ shaka.util.ConfigUtils.mergeConfigObjects =
       isValid = isValid && subMergeValid;
     } else if (typeof source[k] != typeof subTemplate ||
                source[k] == null ||
-               source[k].constructor != subTemplate.constructor) {
+               // Function cosntructors are not informative, and differ
+               // between sync and async functions.  So don't look at
+               // constructor for function types.
+               (typeof source[k] != 'function' &&
+                source[k].constructor != subTemplate.constructor)) {
       // The source is the wrong type.  This check allows objects to be nulled,
       // but does not allow null for any non-object fields.
-      shaka.log.error('Invalid config, wrong type for ' + subPath);
+      shaka.log.alwaysError('Invalid config, wrong type for ' + subPath);
       isValid = false;
     } else if (typeof template[k] == 'function' &&
                template[k].length != source[k].length) {
-      shaka.log.warning(
-          'Invalid config, wrong number of arguments for ' + subPath);
+      shaka.log.alwaysWarn('Unexpected number of arguments for ' + subPath);
       destination[k] = source[k];
     } else {
       destination[k] = source[k];

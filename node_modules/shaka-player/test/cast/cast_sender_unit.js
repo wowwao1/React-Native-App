@@ -63,12 +63,11 @@ describe('CastSender', function() {
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
         Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
-    resetClassVariables();
   });
 
-  afterEach(function(done) {
-    delete window.__onGCastApiAvailable;
-    sender.destroy().catch(fail).then(done);
+  afterEach(async () => {
+    await sender.destroy();
+    resetClassVariables();
   });
 
   afterAll(function() {
@@ -79,18 +78,16 @@ describe('CastSender', function() {
     it('installs a callback if the cast API is not available', function() {
       // Remove the mock cast API.
       delete window['chrome'].cast;
-      // This shouldn't exist yet.
-      expect(window.__onGCastApiAvailable).toBe(undefined);
 
-      // Init and expect the callback to be installed.
+      // Init and expect that apiReady is false and no status is available.
       sender.init();
-      expect(window.__onGCastApiAvailable).not.toBe(undefined);
       expect(sender.apiReady()).toBe(false);
       expect(onStatusChanged).not.toHaveBeenCalled();
 
       // Restore the mock cast API.
       window['chrome'].cast = mockCastApi;
-      window.__onGCastApiAvailable(true);
+      simulateSdkLoaded();
+
       // Expect the API to be ready and initialized.
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
@@ -753,6 +750,86 @@ describe('CastSender', function() {
       }).catch(fail).then(done);
       fakeSessionConnection();
     });
+
+    it('transfers playback to local device', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      expect(sender.isCasting()).toBe(true);
+      expect(onResumeLocal).not.toHaveBeenCalled();
+
+      sender.forceDisconnect();
+
+      expect(sender.isCasting()).toBe(false);
+      expect(onResumeLocal).toHaveBeenCalled();
+    });
+
+    it('succeeds even if session.stop() throws', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      mockSession.stop.and.throwError(new Error('DISCONNECTED!'));
+
+      expect(() => sender.forceDisconnect()).not.toThrow(jasmine.anything());
+    });
+  });
+
+  describe('sendMessage exception', () => {
+    /** @type {Error} */
+    let originalException;
+
+    /** @type {Object} */
+    let expectedError;
+
+    beforeEach(async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      originalException = new Error('DISCONNECTED!');
+
+      expectedError = /** @type {Object} */(Util.jasmineError(
+          new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.CAST,
+              shaka.util.Error.Code.CAST_CONNECTION_TIMED_OUT,
+              originalException)));
+
+      mockSession.sendMessage.and.throwError(originalException);
+    });
+
+    it('propagates to the caller', () => {
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+    });
+
+    it('triggers an error event on Player', () => {
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+
+      const expectedEvent = jasmine.objectContaining({
+        type: 'error',
+        detail: expectedError,
+      });
+
+      expect(onRemoteEvent).toHaveBeenCalledWith('player', expectedEvent);
+    });
+
+    it('disconnects the sender', () => {
+      expect(sender.isCasting()).toBe(true);
+      expect(onResumeLocal).not.toHaveBeenCalled();
+
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+
+      expect(sender.isCasting()).toBe(false);
+      expect(onResumeLocal).toHaveBeenCalled();
+    });
   });
 
   describe('destroy', function() {
@@ -896,11 +973,20 @@ describe('CastSender', function() {
 
   /**
    * @suppress {visibility}
+   * "suppress visibility" has function scope, so this is a mini-function that
+   * exists solely to suppress visibility rules for these actions.
    */
   function resetClassVariables() {
-    // @suppress visibility has function scope, so this is a mini-function that
-    // exists solely to suppress visibility for this call.
     CastSender.hasReceivers_ = false;
     CastSender.session_ = null;
+  }
+
+  /**
+   * @suppress {visibility}
+   * "suppress visibility" has function scope, so this is a mini-function that
+   * exists solely to suppress visibility rules for these actions.
+   */
+  function simulateSdkLoaded() {
+    shaka.cast.CastSender.onSdkLoaded_(true);
   }
 });

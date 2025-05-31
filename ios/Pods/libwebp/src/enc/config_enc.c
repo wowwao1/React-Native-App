@@ -39,6 +39,8 @@ int WebPConfigInitInternal(WebPConfig* config,
   config->partitions = 0;
   config->segments = 4;
   config->pass = 1;
+  config->qmin = 0;
+  config->qmax = 100;
   config->show_compressed = 0;
   config->preprocessing = 0;
   config->autofilter = 0;
@@ -53,7 +55,6 @@ int WebPConfigInitInternal(WebPConfig* config,
   config->thread_level = 0;
   config->low_memory = 0;
   config->near_lossless = 100;
-  config->use_delta_palette = 0;
   config->use_sharp_yuv = 0;
 
   // TODO(skal): tune.
@@ -106,6 +107,9 @@ int WebPValidateConfig(const WebPConfig* config) {
   if (config->filter_type < 0 || config->filter_type > 1) return 0;
   if (config->autofilter < 0 || config->autofilter > 1) return 0;
   if (config->pass < 1 || config->pass > 10) return 0;
+  if (config->qmin < 0 || config->qmax > 100 || config->qmin > config->qmax) {
+    return 0;
+  }
   if (config->show_compressed < 0 || config->show_compressed > 1) return 0;
   if (config->preprocessing < 0 || config->preprocessing > 7) return 0;
   if (config->partitions < 0 || config->partitions > 3) return 0;
@@ -120,9 +124,6 @@ int WebPValidateConfig(const WebPConfig* config) {
   if (config->thread_level < 0 || config->thread_level > 1) return 0;
   if (config->low_memory < 0 || config->low_memory > 1) return 0;
   if (config->exact < 0 || config->exact > 1) return 0;
-  if (config->use_delta_palette < 0 || config->use_delta_palette > 1) {
-    return 0;
-  }
   if (config->use_sharp_yuv < 0 || config->use_sharp_yuv > 1) return 0;
 
   return 1;

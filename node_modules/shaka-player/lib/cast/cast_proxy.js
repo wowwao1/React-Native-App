@@ -72,25 +72,17 @@ shaka.cast.CastProxy = function(video, player, receiverAppId) {
   /** @private {string} */
   this.receiverAppId_ = receiverAppId;
 
-  if (this.receiverAppId_) {
-    // TODO: This is temporary fix to get casting working.
-    // It masks the fact that we're at the moment unable to
-    // change the receiver id sucessfully.
-    // It relies on the assumption that changing one actual
-    // id to another is a very edgy use case (usually apps have
-    // only one receiver app).
-    // It unblocks casting in the world where UI can be configured,
-    // but it's hacky and must be changed to a permanent solution
-    // allowing to change Receiver App ID for reals.
-    /** @private {shaka.cast.CastSender} */
-    this.sender_ = new shaka.cast.CastSender(
-        receiverAppId,
-        () => this.onCastStatusChanged_(),
-        () => this.onFirstCastStateUpdate_(),
-        (targetName, event) => this.onRemoteEvent_(targetName, event),
-        () => this.onResumeLocal_(),
-        () => this.getInitState_());
-  }
+  /** @private {!Map} */
+  this.compiledToExternNames_ = new Map();
+
+  /** @private {shaka.cast.CastSender} */
+  this.sender_ = new shaka.cast.CastSender(
+      receiverAppId,
+      () => this.onCastStatusChanged_(),
+      () => this.onFirstCastStateUpdate_(),
+      (targetName, event) => this.onRemoteEvent_(targetName, event),
+      () => this.onResumeLocal_(),
+      () => this.getInitState_());
 
   this.init_();
 };
@@ -106,7 +98,7 @@ goog.inherits(shaka.cast.CastProxy, shaka.util.FakeEventTarget);
  * @export
  */
 shaka.cast.CastProxy.prototype.destroy = function(forceDisconnect) {
-  if (forceDisconnect && this.sender_) {
+  if (forceDisconnect) {
     this.sender_.forceDisconnect();
   }
 
@@ -175,9 +167,7 @@ shaka.cast.CastProxy.prototype.getPlayer = function() {
  * @export
  */
 shaka.cast.CastProxy.prototype.canCast = function() {
-  return this.sender_ ?
-      this.sender_.apiReady() && this.sender_.hasReceivers() :
-      false;
+  return this.sender_.apiReady() && this.sender_.hasReceivers();
 };
 
 
@@ -186,7 +176,7 @@ shaka.cast.CastProxy.prototype.canCast = function() {
  * @export
  */
 shaka.cast.CastProxy.prototype.isCasting = function() {
-  return this.sender_ ? this.sender_.isCasting() : false;
+  return this.sender_.isCasting();
 };
 
 
@@ -195,7 +185,7 @@ shaka.cast.CastProxy.prototype.isCasting = function() {
  * @export
  */
 shaka.cast.CastProxy.prototype.receiverName = function() {
-  return this.sender_ ? this.sender_.receiverName() : '';
+  return this.sender_.receiverName();
 };
 
 
@@ -205,13 +195,6 @@ shaka.cast.CastProxy.prototype.receiverName = function() {
  * @export
  */
 shaka.cast.CastProxy.prototype.cast = function() {
-  if (!this.sender_) {
-    throw new shaka.util.Error(
-        shaka.util.Error.Severity.RECOVERABLE,
-        shaka.util.Error.Category.CAST,
-        shaka.util.Error.Code.CAST_RECEIVER_APP_ID_MISSING);
-  }
-
   let initState = this.getInitState_();
 
   // TODO: transfer manually-selected tracks?
@@ -236,9 +219,7 @@ shaka.cast.CastProxy.prototype.cast = function() {
  * @export
  */
 shaka.cast.CastProxy.prototype.setAppData = function(appData) {
-  if (this.sender_) {
-    this.sender_.setAppData(appData);
-  }
+  this.sender_.setAppData(appData);
 };
 
 
@@ -247,9 +228,7 @@ shaka.cast.CastProxy.prototype.setAppData = function(appData) {
  * @export
  */
 shaka.cast.CastProxy.prototype.suggestDisconnect = function() {
-  if (this.sender_) {
-    this.sender_.showDisconnectDialog();
-  }
+  this.sender_.showDisconnectDialog();
 };
 
 
@@ -265,15 +244,10 @@ shaka.cast.CastProxy.prototype.changeReceiverId = async function(newAppId) {
 
   this.receiverAppId_ = newAppId;
 
-  // TODO: This code doesn't work correctly at the moment. Changing
-  // one working receiver id to another needs to be figured out.
   // Destroy the old sender
-  if (this.sender_) {
-    this.sender_.forceDisconnect();
-    await this.sender_.destroy();
-    this.sender_ = null;
-  }
-
+  this.sender_.forceDisconnect();
+  await this.sender_.destroy();
+  this.sender_ = null;
 
   // Create the new one
   this.sender_ = new shaka.cast.CastSender(
@@ -293,9 +267,7 @@ shaka.cast.CastProxy.prototype.changeReceiverId = async function(newAppId) {
  * @export
  */
 shaka.cast.CastProxy.prototype.forceDisconnect = function() {
-  if (this.sender_) {
-    this.sender_.forceDisconnect();
-  }
+  this.sender_.forceDisconnect();
 };
 
 
@@ -304,9 +276,7 @@ shaka.cast.CastProxy.prototype.forceDisconnect = function() {
  * @private
  */
 shaka.cast.CastProxy.prototype.init_ = function() {
-  if (this.sender_) {
-    this.sender_.init();
-  }
+  this.sender_.init();
 
   this.eventManager_ = new shaka.util.EventManager();
 
@@ -332,12 +302,17 @@ shaka.cast.CastProxy.prototype.init_ = function() {
   }
 
   this.playerProxy_ = {};
-  for (let k in /** @type {Object} */(this.localPlayer_)) {
-    Object.defineProperty(this.playerProxy_, k, {
+  this.iterateOverPlayerMethods_((name, method) => {
+    goog.asserts.assert(this.playerProxy_, 'Must have player proxy!');
+    Object.defineProperty(this.playerProxy_, name, {
       configurable: false,
       enumerable: true,
-      get: this.playerProxyGet_.bind(this, k),
+      get: () => this.playerProxyGet_(name),
     });
+  });
+
+  if (COMPILED) {
+    this.mapCompiledToUncompiledPlayerMethodNames_();
   }
 
   this.videoEventTarget_ = new shaka.util.FakeEventTarget();
@@ -347,6 +322,93 @@ shaka.cast.CastProxy.prototype.init_ = function() {
   this.playerEventTarget_ = new shaka.util.FakeEventTarget();
   this.playerEventTarget_.dispatchTarget =
       /** @type {EventTarget} */(this.playerProxy_);
+};
+
+
+/**
+ * Maps compiled to uncompiled player names so we can figure out
+ * which method to call in compiled build, while casting.
+ * @private
+ */
+shaka.cast.CastProxy.prototype.
+    mapCompiledToUncompiledPlayerMethodNames_ = function() {
+  // In compiled mode, UI tries to access player methods
+  // by their internal renamed names, but the proxy object doesn't know about
+  // those.
+  // See https://github.com/google/shaka-player/issues/2130 for details.
+  const methodsToNames = new Map();
+  this.iterateOverPlayerMethods_((name, method) => {
+    if (methodsToNames.has(method)) {
+      // If two method names, point to the same method, add them to the
+      // map as aliases of each other.
+      const name2 = methodsToNames.get(method);
+      // Assumes that the compiled name is shorter
+      if (name.length < name2.length) {
+        this.compiledToExternNames_.set(name, name2);
+      } else {
+        this.compiledToExternNames_.set(name2, name);
+      }
+    } else {
+      methodsToNames.set(method, name);
+    }
+  });
+};
+
+
+/**
+ * Iterates over all of the methods of the player, including inherited methods
+ * from FakeEventTarget.
+ * @param {function(string, function())} operation
+ * @private
+ */
+shaka.cast.CastProxy.prototype.iterateOverPlayerMethods_ = function(operation) {
+  goog.asserts.assert(this.localPlayer_, 'Must have player!');
+  const player = /** @type {!Object} */ (this.localPlayer_);
+  // Avoid accessing any over-written methods in the prototype chain.
+  const seenNames = new Set();
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  function shouldAddToTheMap(name) {
+    if (name == 'constructor') {
+      // Don't proxy the constructor.
+      return false;
+    }
+
+    const method = /** @type {Object} */(player)[name];
+    if (typeof method != 'function') {
+      // Don't proxy non-methods.
+      return false;
+    }
+
+    // Add if the map does not already have it
+    return !seenNames.has(name);
+  }
+
+  // First, look at the methods on the object itself, so this can properly
+  // proxy any methods not on the prototype (for example, in the mock player).
+  for (const key in player) {
+    if (shouldAddToTheMap(key)) {
+      seenNames.add(key);
+      operation(key, player[key]);
+    }
+  }
+
+  // The exact length of the prototype chain might vary; for resiliency, this
+  // will just look at the entire chain, rather than assuming a set length.
+  let proto = /** @type {!Object} */ (Object.getPrototypeOf(player));
+  const objProto = /** @type {!Object} */ (Object.getPrototypeOf({}));
+  while (proto && proto != objProto) { // Don't proxy Object methods.
+    for (const name of Object.getOwnPropertyNames(proto)) {
+      if (shouldAddToTheMap(name)) {
+        seenNames.add(name);
+        operation(name, (player)[name]);
+      }
+    }
+    proto = /** @type {!Object} */ (Object.getPrototypeOf(proto));
+  }
 };
 
 
@@ -424,9 +486,6 @@ shaka.cast.CastProxy.prototype.onFirstCastStateUpdate_ = function() {
  * @private
  */
 shaka.cast.CastProxy.prototype.onResumeLocal_ = function() {
-  goog.asserts.assert(this.sender_,
-      'Cast sender should not be null!');
-
   // Transfer back the player state.
   shaka.cast.CastUtils.PlayerInitState.forEach(function(pair) {
     let getter = pair[0];
@@ -514,8 +573,7 @@ shaka.cast.CastProxy.prototype.videoProxyGet_ = function(name) {
 
   // If we are casting, but the first update has not come in yet, use local
   // values, but not local methods.
-  if (this.sender_ && this.sender_.isCasting() &&
-      !this.sender_.hasRemoteProperties()) {
+  if (this.sender_.isCasting() && !this.sender_.hasRemoteProperties()) {
     let value = this.localVideo_[name];
     if (typeof value != 'function') {
       return value;
@@ -523,7 +581,7 @@ shaka.cast.CastProxy.prototype.videoProxyGet_ = function(name) {
   }
 
   // Use local values and methods if we are not casting.
-  if (!this.sender_ || !this.sender_.isCasting()) {
+  if (!this.sender_.isCasting()) {
     let value = this.localVideo_[name];
     if (typeof value == 'function') {
       value = value.bind(this.localVideo_);
@@ -541,7 +599,7 @@ shaka.cast.CastProxy.prototype.videoProxyGet_ = function(name) {
  * @private
  */
 shaka.cast.CastProxy.prototype.videoProxySet_ = function(name, value) {
-  if (!this.sender_ || !this.sender_.isCasting()) {
+  if (!this.sender_.isCasting()) {
     this.localVideo_[name] = value;
     return;
   }
@@ -555,7 +613,7 @@ shaka.cast.CastProxy.prototype.videoProxySet_ = function(name, value) {
  * @private
  */
 shaka.cast.CastProxy.prototype.videoProxyLocalEvent_ = function(event) {
-  if (this.sender_ && this.sender_.isCasting()) {
+  if (this.sender_.isCasting()) {
     // Ignore any unexpected local events while casting.  Events can still be
     // fired by the local video and Player when we unload() after the Cast
     // connection is complete.
@@ -575,6 +633,12 @@ shaka.cast.CastProxy.prototype.videoProxyLocalEvent_ = function(event) {
  * @private
  */
 shaka.cast.CastProxy.prototype.playerProxyGet_ = function(name) {
+  // If name is a shortened compiled name, get the original version from our
+  // map.
+  if (this.compiledToExternNames_.has(name)) {
+    name = this.compiledToExternNames_.get(name);
+  }
+
   if (name == 'addEventListener') {
     return this.playerEventTarget_.addEventListener.bind(
         this.playerEventTarget_);
@@ -591,22 +655,20 @@ shaka.cast.CastProxy.prototype.playerProxyGet_ = function(name) {
   if (name == 'getSharedConfiguration') {
     shaka.log.warning(
         'Can\'t share configuration across a network. Returning copy.');
-    return this.sender_ ?
-           this.sender_.get('player', 'getConfiguration') :
-           this.localPlayer_.getConfiguration();
+    return this.sender_.get('player', 'getConfiguration');
   }
 
   if (name == 'getNetworkingEngine') {
     // Always returns a local instance, in case you need to make a request.
     // Issues a warning, in case you think you are making a remote request
     // or affecting remote filters.
-    if (this.sender_ && this.sender_.isCasting()) {
+    if (this.sender_.isCasting()) {
       shaka.log.warning('NOTE: getNetworkingEngine() is always local!');
     }
     return this.localPlayer_.getNetworkingEngine.bind(this.localPlayer_);
   }
 
-  if (this.sender_ && this.sender_.isCasting()) {
+  if (this.sender_.isCasting()) {
     // These methods are unavailable or otherwise stubbed during casting.
     if (name == 'getManifest' || name == 'drmInfo') {
       return function() {
@@ -634,8 +696,7 @@ shaka.cast.CastProxy.prototype.playerProxyGet_ = function(name) {
 
   // If we are casting, but the first update has not come in yet, use local
   // getters, but not local methods.
-  if (this.sender_ && this.sender_.isCasting() &&
-      !this.sender_.hasRemoteProperties()) {
+  if (this.sender_.isCasting() && !this.sender_.hasRemoteProperties()) {
     if (shaka.cast.CastUtils.PlayerGetterMethods[name]) {
       let value = /** @type {Object} */(this.localPlayer_)[name];
       goog.asserts.assert(typeof value == 'function', 'only methods on Player');
@@ -644,7 +705,7 @@ shaka.cast.CastProxy.prototype.playerProxyGet_ = function(name) {
   }
 
   // Use local getters and methods if we are not casting.
-  if (!this.sender_ || !this.sender_.isCasting()) {
+  if (!this.sender_.isCasting()) {
     let value = /** @type {Object} */(this.localPlayer_)[name];
     goog.asserts.assert(typeof value == 'function', 'only methods on Player');
     return value.bind(this.localPlayer_);
@@ -659,7 +720,7 @@ shaka.cast.CastProxy.prototype.playerProxyGet_ = function(name) {
  * @private
  */
 shaka.cast.CastProxy.prototype.playerProxyLocalEvent_ = function(event) {
-  if (this.sender_ && this.sender_.isCasting()) {
+  if (this.sender_.isCasting()) {
     // Ignore any unexpected local events while casting.
     return;
   }
@@ -674,7 +735,7 @@ shaka.cast.CastProxy.prototype.playerProxyLocalEvent_ = function(event) {
  * @private
  */
 shaka.cast.CastProxy.prototype.onRemoteEvent_ = function(targetName, event) {
-  goog.asserts.assert(this.sender_ && this.sender_.isCasting(),
+  goog.asserts.assert(this.sender_.isCasting(),
                       'Should only receive remote events while casting');
   if (!this.sender_.isCasting()) {
     // Ignore any unexpected remote events.

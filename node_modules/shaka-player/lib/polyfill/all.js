@@ -18,12 +18,14 @@
 goog.provide('shaka.polyfill.installAll');
 goog.provide('shaka.polyfill.register');
 
+goog.require('shaka.log');
+
 
 /**
  * @namespace shaka.polyfill
  * @summary A one-stop installer for all polyfills.
  * @see http://enwp.org/polyfill
- * @exportDoc
+ * @exportInterface
  */
 
 
@@ -33,7 +35,11 @@ goog.provide('shaka.polyfill.register');
  */
 shaka.polyfill.installAll = function() {
   for (let i = 0; i < shaka.polyfill.polyfills_.length; ++i) {
-    shaka.polyfill.polyfills_[i].callback();
+    try {
+      shaka.polyfill.polyfills_[i].callback();
+    } catch (error) {
+      shaka.log.alwaysWarn('Error installing polyfill!', error);
+    }
   }
 };
 

@@ -1,7 +1,7 @@
 //
 // RSKImageCropViewController.m
 //
-// Copyright (c) 2014-present Ruslan Skorb, http://ruslanskorb.com/
+// Copyright © 2014-present Ruslan Skorb. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,20 +25,19 @@
 #import "RSKImageCropViewController.h"
 #import "RSKTouchView.h"
 #import "RSKImageScrollView.h"
+#import "RSKImageScrollViewDelegate.h"
 #import "RSKInternalUtility.h"
 #import "UIImage+RSKImageCropper.h"
 #import "CGGeometry+RSKImageCropper.h"
-#import "UIApplication+RSKImageCropper.h"
 
 static const CGFloat kResetAnimationDuration = 0.4;
 static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 
-@interface RSKImageCropViewController () <UIGestureRecognizerDelegate>
+@interface RSKImageCropViewController () <RSKImageScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (assign, nonatomic) BOOL originalNavigationControllerNavigationBarHidden;
 @property (strong, nonatomic) UIImage *originalNavigationControllerNavigationBarShadowImage;
 @property (copy, nonatomic) UIColor *originalNavigationControllerViewBackgroundColor;
-@property (assign, nonatomic) BOOL originalStatusBarHidden;
 
 @property (strong, nonatomic) RSKImageScrollView *imageScrollView;
 @property (strong, nonatomic) RSKTouchView *overlayView;
@@ -80,25 +79,27 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _alwaysBounceVertical = NO;
         _alwaysBounceHorizontal = NO;
         _applyMaskToCroppedImage = NO;
+        _bounces = YES;
+        _bouncesZoom = YES;
         _maskLayerLineWidth = 1.0;
         _rotationEnabled = NO;
         _cropMode = RSKImageCropModeCircle;
         
         _portraitCircleMaskRectInnerEdgeInset = 15.0f;
         _portraitSquareMaskRectInnerEdgeInset = 20.0f;
-        _portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace = 64.0f;
-        _portraitCropViewBottomAndCancelButtonBottomVerticalSpace = 21.0f;
-        _portraitCropViewBottomAndChooseButtonBottomVerticalSpace = 21.0f;
-        _portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace = 13.0f;
-        _portraitCropViewTrailingAndChooseButtonTrailingHorizontalSpace = 13.0;
+        _portraitMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace = 44.0f;
+        _portraitCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace = 21.0f;
+        _portraitCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace = 21.0f;
+        _portraitCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace = 13.0f;
+        _portraitCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace = 13.0;
         
         _landscapeCircleMaskRectInnerEdgeInset = 45.0f;
         _landscapeSquareMaskRectInnerEdgeInset = 45.0f;
-        _landscapeMoveAndScaleLabelTopAndCropViewTopVerticalSpace = 12.0f;
-        _landscapeCropViewBottomAndCancelButtonBottomVerticalSpace = 12.0f;
-        _landscapeCropViewBottomAndChooseButtonBottomVerticalSpace = 12.0f;
-        _landscapeCancelButtonLeadingAndCropViewLeadingHorizontalSpace = 13.0;
-        _landscapeCropViewTrailingAndChooseButtonTrailingHorizontalSpace = 13.0;
+        _landscapeMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace = 12.0f;
+        _landscapeCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace = 12.0f;
+        _landscapeCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace = 12.0f;
+        _landscapeCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace = 13.0;
+        _landscapeCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace = 13.0;
     }
     return self;
 }
@@ -135,14 +136,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         self.edgesForExtendedLayout = UIRectEdgeNone;
     }
     
-    if (@available(iOS 11.0, *)) {
-        
-        self.imageScrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-    }
-    else if ([self respondsToSelector:@selector(automaticallyAdjustsScrollViewInsets)] == YES) {
-        
-        self.automaticallyAdjustsScrollViewInsets = NO;
-    }
+    self.imageScrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     
     self.view.backgroundColor = [UIColor blackColor];
     self.view.clipsToBounds = YES;
@@ -160,16 +154,6 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
-    if ([self respondsToSelector:@selector(prefersStatusBarHidden)] == NO) {
-        
-        UIApplication *application = [UIApplication rsk_sharedApplication];
-        if (application) {
-            
-            self.originalStatusBarHidden = application.statusBarHidden;
-            [application setStatusBarHidden:YES];
-        }
-    }
     
     self.originalNavigationControllerNavigationBarHidden = self.navigationController.navigationBarHidden;
     [self.navigationController setNavigationBarHidden:YES animated:NO];
@@ -189,15 +173,6 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    
-    if ([self respondsToSelector:@selector(prefersStatusBarHidden)] == NO) {
-        
-        UIApplication *application = [UIApplication rsk_sharedApplication];
-        if (application) {
-            
-            [application setStatusBarHidden:self.originalStatusBarHidden];
-        }
-    }
     
     [self.navigationController setNavigationBarHidden:self.originalNavigationControllerNavigationBarHidden animated:animated];
     self.navigationController.navigationBar.shadowImage = self.originalNavigationControllerNavigationBarShadowImage;
@@ -219,7 +194,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 {
     [super viewDidLayoutSubviews];
     
-    if (!self.imageScrollView.zoomView) {
+    if (!self.imageScrollView.image) {
         [self displayImage];
     }
 }
@@ -234,13 +209,13 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         // ---------------------------
         
         NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:self.moveAndScaleLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual
-                                                                         toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0f
+                                                                         toItem:self.view.safeAreaLayoutGuide attribute:NSLayoutAttributeCenterX multiplier:1.0f
                                                                        constant:0.0f];
         [self.view addConstraint:constraint];
         
-        CGFloat constant = self.portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
+        CGFloat constant = self.portraitMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace;
         self.moveAndScaleLabelTopConstraint = [NSLayoutConstraint constraintWithItem:self.moveAndScaleLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual
-                                                                              toItem:self.view attribute:NSLayoutAttributeTop multiplier:1.0f
+                                                                              toItem:self.view.safeAreaLayoutGuide attribute:NSLayoutAttributeTop multiplier:1.0f
                                                                             constant:constant];
         [self.view addConstraint:self.moveAndScaleLabelTopConstraint];
         
@@ -248,14 +223,14 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         // The button "Cancel".
         // --------------------
         
-        constant = self.portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
+        constant = self.portraitCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace;
         self.cancelButtonLeadingConstraint = [NSLayoutConstraint constraintWithItem:self.cancelButton attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual
-                                                                             toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1.0f
+                                                                             toItem:self.view.safeAreaLayoutGuide attribute:NSLayoutAttributeLeading multiplier:1.0f
                                                                            constant:constant];
         [self.view addConstraint:self.cancelButtonLeadingConstraint];
         
-        constant = self.portraitCropViewBottomAndCancelButtonBottomVerticalSpace;
-        self.cancelButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
+        constant = self.portraitCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace;
+        self.cancelButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.view.safeAreaLayoutGuide attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
                                                                             toItem:self.cancelButton attribute:NSLayoutAttributeBottom multiplier:1.0f
                                                                           constant:constant];
         [self.view addConstraint:self.cancelButtonBottomConstraint];
@@ -264,14 +239,14 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         // The button "Choose".
         // --------------------
         
-        constant = self.portraitCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
-        self.chooseButtonTrailingConstraint = [NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
+        constant = self.portraitCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace;
+        self.chooseButtonTrailingConstraint = [NSLayoutConstraint constraintWithItem:self.view.safeAreaLayoutGuide attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual
                                                                               toItem:self.chooseButton attribute:NSLayoutAttributeTrailing multiplier:1.0f
                                                                             constant:constant];
         [self.view addConstraint:self.chooseButtonTrailingConstraint];
         
-        constant = self.portraitCropViewBottomAndChooseButtonBottomVerticalSpace;
-        self.chooseButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
+        constant = self.portraitCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace;
+        self.chooseButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.view.safeAreaLayoutGuide attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
                                                                             toItem:self.chooseButton attribute:NSLayoutAttributeBottom multiplier:1.0f
                                                                           constant:constant];
         [self.view addConstraint:self.chooseButtonBottomConstraint];
@@ -279,17 +254,17 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         self.didSetupConstraints = YES;
     } else {
         if ([self isPortraitInterfaceOrientation]) {
-            self.moveAndScaleLabelTopConstraint.constant = self.portraitMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
-            self.cancelButtonBottomConstraint.constant = self.portraitCropViewBottomAndCancelButtonBottomVerticalSpace;
-            self.cancelButtonLeadingConstraint.constant = self.portraitCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
-            self.chooseButtonBottomConstraint.constant = self.portraitCropViewBottomAndChooseButtonBottomVerticalSpace;
-            self.chooseButtonTrailingConstraint.constant = self.portraitCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
+            self.moveAndScaleLabelTopConstraint.constant = self.portraitMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace;
+            self.cancelButtonBottomConstraint.constant = self.portraitCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace;
+            self.cancelButtonLeadingConstraint.constant = self.portraitCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace;
+            self.chooseButtonBottomConstraint.constant = self.portraitCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace;
+            self.chooseButtonTrailingConstraint.constant = self.portraitCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace;
         } else {
-            self.moveAndScaleLabelTopConstraint.constant = self.landscapeMoveAndScaleLabelTopAndCropViewTopVerticalSpace;
-            self.cancelButtonBottomConstraint.constant = self.landscapeCropViewBottomAndCancelButtonBottomVerticalSpace;
-            self.cancelButtonLeadingConstraint.constant = self.landscapeCancelButtonLeadingAndCropViewLeadingHorizontalSpace;
-            self.chooseButtonBottomConstraint.constant = self.landscapeCropViewBottomAndChooseButtonBottomVerticalSpace;
-            self.chooseButtonTrailingConstraint.constant = self.landscapeCropViewTrailingAndChooseButtonTrailingHorizontalSpace;
+            self.moveAndScaleLabelTopConstraint.constant = self.landscapeMoveAndScaleLabelTopAndCropViewSafeAreaTopVerticalSpace;
+            self.cancelButtonBottomConstraint.constant = self.landscapeCropViewSafeAreaBottomAndCancelButtonBottomVerticalSpace;
+            self.cancelButtonLeadingConstraint.constant = self.landscapeCancelButtonLeadingAndCropViewSafeAreaLeadingHorizontalSpace;
+            self.chooseButtonBottomConstraint.constant = self.landscapeCropViewSafeAreaBottomAndChooseButtonBottomVerticalSpace;
+            self.chooseButtonTrailingConstraint.constant = self.landscapeCropViewSafeAreaTrailingAndChooseButtonTrailingHorizontalSpace;
         }
     }
 }
@@ -304,6 +279,9 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _imageScrollView.aspectFill = self.avoidEmptySpaceAroundImage;
         _imageScrollView.alwaysBounceHorizontal = self.alwaysBounceHorizontal;
         _imageScrollView.alwaysBounceVertical = self.alwaysBounceVertical;
+        _imageScrollView.bounces = self.bounces;
+        _imageScrollView.bouncesZoom = self.bouncesZoom;
+        _imageScrollView.imageScrollViewDelegate = self;
     }
     return _imageScrollView;
 }
@@ -551,12 +529,30 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     }
 }
 
+- (void)setBounces:(BOOL)bounces
+{
+    if (_bounces != bounces) {
+        _bounces = bounces;
+        
+        self.imageScrollView.bounces = bounces;
+    }
+}
+
+- (void)setBouncesZoom:(BOOL)bouncesZoom
+{
+    if (_bouncesZoom != bouncesZoom) {
+        _bouncesZoom = bouncesZoom;
+        
+        self.imageScrollView.bouncesZoom = bouncesZoom;
+    }
+}
+
 - (void)setCropMode:(RSKImageCropMode)cropMode
 {
     if (_cropMode != cropMode) {
         _cropMode = cropMode;
         
-        if (self.imageScrollView.zoomView) {
+        if (self.imageScrollView.image) {
             [self reset:NO];
         }
     }
@@ -581,10 +577,14 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         [clipPath appendPath:maskPath];
         clipPath.usesEvenOddFillRule = YES;
         
-        CABasicAnimation *pathAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
-        pathAnimation.duration = [CATransaction animationDuration];
-        pathAnimation.timingFunction = [CATransaction animationTimingFunction];
-        [self.maskLayer addAnimation:pathAnimation forKey:@"path"];
+        CAAnimation *animation = (CAAnimation *)[self.overlayView actionForLayer:self.overlayView.layer forKey:@"backgroundColor"];
+        if ([animation isKindOfClass:[CAAnimation class]]) {
+            CABasicAnimation *pathAnimation = [CABasicAnimation animationWithKeyPath:@"path"];
+            pathAnimation.duration = animation.duration;
+            pathAnimation.timingFunction = animation.timingFunction;
+            
+            [self.maskLayer addAnimation:pathAnimation forKey:@"path"];
+        }
         
         self.maskLayer.path = [clipPath CGPath];
     }
@@ -628,7 +628,11 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 
 - (void)handleDoubleTap:(UITapGestureRecognizer *)gestureRecognizer
 {
-    [self reset:YES];
+    if (self.imageScrollView.zoomScale == self.zoomScaleDefaultValue) {
+        [self.imageScrollView zoomToLocation:[gestureRecognizer locationInView:self.imageScrollView] animated:YES];
+    } else {
+        [self reset:YES];
+    }
 }
 
 - (void)handleRotation:(UIRotationGestureRecognizer *)gestureRecognizer
@@ -652,6 +656,8 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 
 - (void)zoomToRect:(CGRect)rect animated:(BOOL)animated
 {
+    rect = [self.imageScrollView convertRect:rect fromView:self.view];
+    rect = [self.imageScrollView convertRect:rect toCoordinateSpace:self.imageScrollView.imageViewCoordinateSpace];
     [self.imageScrollView zoomToRect:rect animated:animated];
 }
 
@@ -676,6 +682,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     [self resetRotation];
     [self resetZoomScale];
     [self resetContentOffset];
+    [self centerImage];
     
     if (animated) {
         [UIView commitAnimations];
@@ -685,7 +692,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)resetContentOffset
 {
     CGSize boundsSize = self.imageScrollView.bounds.size;
-    CGRect frameToCenter = self.imageScrollView.zoomView.frame;
+    CGRect frameToCenter = self.imageScrollView.imageViewFrame;
     
     CGPoint contentOffset;
     if (CGRectGetWidth(frameToCenter) > boundsSize.width) {
@@ -709,13 +716,18 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 
 - (void)resetZoomScale
 {
+    self.imageScrollView.zoomScale = self.zoomScaleDefaultValue;
+}
+
+- (CGFloat)zoomScaleDefaultValue
+{
     CGFloat zoomScale;
     if (CGRectGetWidth(self.view.bounds) > CGRectGetHeight(self.view.bounds)) {
         zoomScale = CGRectGetHeight(self.view.bounds) / self.originalImage.size.height;
     } else {
         zoomScale = CGRectGetWidth(self.view.bounds) / self.originalImage.size.width;
     }
-    self.imageScrollView.zoomScale = zoomScale;
+    return zoomScale;
 }
 
 - (NSArray *)intersectionPointsOfLineSegment:(RSKLineSegment)lineSegment withRect:(CGRect)rect
@@ -757,7 +769,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)displayImage
 {
     if (self.originalImage) {
-        [self.imageScrollView displayImage:self.originalImage];
+        self.imageScrollView.image = self.originalImage;
         [self reset:NO];
 
         if ([self.delegate respondsToSelector:@selector(imageCropViewControllerDidDisplayImage:)]) {
@@ -766,9 +778,9 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     }
 }
 
-- (void)centerImageScrollViewZoomView
+- (void)centerImage
 {
-    // center imageScrollView.zoomView as it becomes smaller than the size of the screen
+    // center the image view of the imageScrollView as it becomes smaller than the size of the imageScrollView
     
     CGPoint contentOffset = self.imageScrollView.contentOffset;
     
@@ -863,7 +875,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     self.imageScrollView.transform = CGAffineTransformIdentity;
     
     self.imageScrollView.frame = frame;
-    [self centerImageScrollViewZoomView];
+    [self centerImage];
     
     self.imageScrollView.transform = transform;
 }
@@ -890,10 +902,11 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
             
             CGSize maskSize = CGSizeMake(diameter, diameter);
             
-            self.maskRect = CGRectMake((viewWidth - maskSize.width) * 0.5f,
-                                       (viewHeight - maskSize.height) * 0.5f,
-                                       maskSize.width,
-                                       maskSize.height);
+            CGRect maskRect = CGRectMake(floor((viewWidth - maskSize.width) * 0.5f),
+                                         floor((viewHeight - maskSize.height) * 0.5f),
+                                         maskSize.width,
+                                         maskSize.height);
+            self.maskRect = CGRectIntegral(maskRect);
             break;
         }
         case RSKImageCropModeSquare: {
@@ -909,10 +922,11 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
             
             CGSize maskSize = CGSizeMake(length, length);
             
-            self.maskRect = CGRectMake((viewWidth - maskSize.width) * 0.5f,
-                                       (viewHeight - maskSize.height) * 0.5f,
-                                       maskSize.width,
-                                       maskSize.height);
+            CGRect maskRect = CGRectMake(floor((viewWidth - maskSize.width) * 0.5f),
+                                         floor((viewHeight - maskSize.height) * 0.5f),
+                                         maskSize.width,
+                                         maskSize.height);
+            self.maskRect = CGRectIntegral(maskRect);
             break;
         }
         case RSKImageCropModeCustom: {
@@ -1049,11 +1063,48 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     }
 }
 
+#pragma mark - RSKImageScrollViewDelegate
+
+- (void)imageScrollViewWillBeginDragging
+{
+    [self updateIsUserInteractionEnabledOfCancelAndChooseButtons];
+}
+
+- (void)imageScrollViewDidEndDragging:(BOOL)willDecelerate
+{
+    if (willDecelerate == NO) {
+        [self updateIsUserInteractionEnabledOfCancelAndChooseButtons];
+    }
+}
+
+- (void)imageScrollViewDidEndDecelerating
+{
+    [self updateIsUserInteractionEnabledOfCancelAndChooseButtons];
+}
+
+- (void)imageScrollViewWillBeginZooming
+{
+    [self updateIsUserInteractionEnabledOfCancelAndChooseButtons];
+}
+
+- (void)imageScrollViewDidEndZooming
+{
+    [self updateIsUserInteractionEnabledOfCancelAndChooseButtons];
+}
+
+- (void)updateIsUserInteractionEnabledOfCancelAndChooseButtons
+{
+    BOOL isUserInteractionEnabled = (self.imageScrollView.isDragging || self.imageScrollView.isDecelerating || self.imageScrollView.isZooming) == NO;
+    
+    [self.cancelButton setUserInteractionEnabled:isUserInteractionEnabled];
+    [self.chooseButton setUserInteractionEnabled:isUserInteractionEnabled];
+}
+
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
-    return YES;
+    return ([gestureRecognizer isEqual:self.doubleTapGestureRecognizer] || [otherGestureRecognizer isEqual:self.doubleTapGestureRecognizer]) == NO;
 }
 
 @end

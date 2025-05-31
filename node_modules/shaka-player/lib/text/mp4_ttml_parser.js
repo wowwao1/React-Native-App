@@ -27,6 +27,7 @@ goog.require('shaka.util.Mp4Parser');
  * @struct
  * @constructor
  * @implements {shaka.extern.TextParser}
+ * @export
  */
 shaka.text.Mp4TtmlParser = function() {
   /**
@@ -37,7 +38,10 @@ shaka.text.Mp4TtmlParser = function() {
 };
 
 
-/** @override **/
+/**
+ * @override
+ * @export
+ */
 shaka.text.Mp4TtmlParser.prototype.parseInit = function(data) {
   const Mp4Parser = shaka.util.Mp4Parser;
 
@@ -64,7 +68,10 @@ shaka.text.Mp4TtmlParser.prototype.parseInit = function(data) {
 };
 
 
-/** @override **/
+/**
+ * @override
+ * @export
+ */
 shaka.text.Mp4TtmlParser.prototype.parseMedia = function(data, time) {
   const Mp4Parser = shaka.util.Mp4Parser;
 
@@ -91,8 +98,13 @@ shaka.text.Mp4TtmlParser.prototype.parseMedia = function(data, time) {
 
 
 shaka.text.TextEngine.registerParser(
-    'application/mp4; codecs="stpp"',
-    shaka.text.Mp4TtmlParser);
+    'application/mp4; codecs="stpp"', shaka.text.Mp4TtmlParser);
 shaka.text.TextEngine.registerParser(
-    'application/mp4; codecs="stpp.TTML.im1t"',
-    shaka.text.Mp4TtmlParser);
+    'application/mp4; codecs="stpp.ttml.im1t"', shaka.text.Mp4TtmlParser);
+// Legacy codec string uses capital "TTML", i.e.: prior to HLS rfc8216bis:
+//   Note that if a Variant Stream specifies one or more Renditions that
+//   include IMSC subtitles, the CODECS attribute MUST indicate this with a
+//   format identifier such as "stpp.ttml.im1t".
+// (https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-05#section-4.4.5.2)
+shaka.text.TextEngine.registerParser(
+    'application/mp4; codecs="stpp.TTML.im1t"', shaka.text.Mp4TtmlParser);

@@ -294,7 +294,7 @@ shaka.cast.CastReceiver.prototype.onCastStatusChanged_ = function() {
     this.dispatchEvent(event);
     // Send a media status message, with a media info message if appropriate.
     if (!this.maybeSendMediaInfoMessage_()) {
-      this.sendMediaStatus_(0);
+      this.sendMediaStatus_();
     }
   }.bind(this));
 };
@@ -352,7 +352,7 @@ shaka.cast.CastReceiver.prototype.initState_ = function(initState, appData) {
       // Resume playback with transferred state.
       this.video_.play();
       // Notify generic controllers of the state change.
-      this.sendMediaStatus_(0);
+      this.sendMediaStatus_();
     }
   }, (error) => {
     // Pass any errors through to the app.
@@ -468,19 +468,25 @@ shaka.cast.CastReceiver.prototype.maybeSendMediaInfoMessage_ = function() {
 
 /**
  * Composes and sends a mediaStatus message with a mediaInfo component.
+ *
+ * @param {number=} requestId
  * @private
  */
-shaka.cast.CastReceiver.prototype.sendMediaInfoMessage_ = function() {
+shaka.cast.CastReceiver.prototype.sendMediaInfoMessage_ =
+    function(requestId = 0) {
   let media = {
     'contentId': this.player_.getAssetUri(),
     'streamType': this.player_.isLive() ? 'LIVE' : 'BUFFERED',
-    'duration': this.video_.duration,
     // TODO: Is there a use case when this would be required?
     // Sending an empty string for now since it's a mandatory
     // field.
     'contentType': '',
   };
-  this.sendMediaStatus_(0, media);
+  if (!this.player_.isLive()) {
+    // Optional, and only sent when the duration is known.
+    media['duration'] = this.video_.duration;
+  }
+  this.sendMediaStatus_(requestId, media);
 };
 
 
@@ -619,11 +625,11 @@ shaka.cast.CastReceiver.prototype.onGenericMessage_ = function(event) {
       // Notify generic controllers that the player state changed.
       // requestId=0 (the parameter) means that the message was not
       // triggered by a GET_STATUS request.
-      this.sendMediaStatus_(0);
+      this.sendMediaStatus_();
       break;
     case 'PAUSE':
       this.video_.pause();
-      this.sendMediaStatus_(0);
+      this.sendMediaStatus_();
       break;
     case 'SEEK': {
       let currentTime = message['currentTime'];
@@ -633,10 +639,10 @@ shaka.cast.CastReceiver.prototype.onGenericMessage_ = function(event) {
       }
       if (resumeState && resumeState == 'PLAYBACK_START') {
         this.video_.play();
-        this.sendMediaStatus_(0);
+        this.sendMediaStatus_();
       } else if (resumeState && resumeState == 'PLAYBACK_PAUSE') {
         this.video_.pause();
-        this.sendMediaStatus_(0);
+        this.sendMediaStatus_();
       }
       break;
     }
@@ -647,7 +653,7 @@ shaka.cast.CastReceiver.prototype.onGenericMessage_ = function(event) {
           return;
         }
 
-        this.sendMediaStatus_(0);
+        this.sendMediaStatus_();
       }.bind(this));
       break;
     case 'GET_STATUS':
@@ -656,7 +662,7 @@ shaka.cast.CastReceiver.prototype.onGenericMessage_ = function(event) {
       // but it doesn't appear to be working.
       // Look into what's going on there and change this to be a
       // unicast.
-      this.sendMediaStatus_(Number(message['requestId']));
+      this.sendMediaInfoMessage_(Number(message['requestId']));
       break;
     case 'VOLUME': {
       let volumeObject = message['volume'];
@@ -673,7 +679,7 @@ shaka.cast.CastReceiver.prototype.onGenericMessage_ = function(event) {
       // Notify generic controllers if the volume changed.
       if (oldVolumeLevel != this.video_.volume ||
           oldVolumeMuted != this.video_.muted) {
-        this.sendMediaStatus_(0);
+        this.sendMediaStatus_();
       }
       break;
     }
@@ -796,12 +802,12 @@ shaka.cast.CastReceiver.prototype.getPlayState_ = function() {
 
 
 /**
- * @param {number} requestId
+ * @param {number=} requestId
  * @param {Object=} media
  * @private
  */
 shaka.cast.CastReceiver.prototype.sendMediaStatus_ =
-    function(requestId, media) {
+    function(requestId = 0, media = null) {
   let mediaStatus = {
     // mediaSessionId is a unique ID for the playback of this specific session.
     // It's used to identify a specific instance of a playback.
@@ -819,9 +825,8 @@ shaka.cast.CastReceiver.prototype.sendMediaStatus_ =
     // 8 - Stream mute
     // 16 - Skip forward
     // 32 - Skip backward
-    // We support pause, seek, volume and mute which gives a value of
-    // 1+2+4+8=15
-    'supportedMediaCommands': 15,
+    // We support all of them, and their sum is 63.
+    'supportedMediaCommands': 63,
     'volume': {
       'level': this.video_.volume,
       'muted': this.video_.muted,

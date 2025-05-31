@@ -26,7 +26,9 @@ default content ID derivation, you need to specify a custom init data transform:
 
 ```js
 player.configure('drm.initDataTransform', (initData) => {
-  const contentId = getMyContentId(initData);
+  // 'initData' is a buffer containing an 'skd://' URL as a UTF-8 string.
+  const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
+  const contentId = getMyContentId(sdkUri);
   const cert = player.drmInfo().serverCertificate;
   return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
 });
@@ -56,7 +58,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request) => {
   request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
 });
 
-player.getNetworkingEngine().registerResponseFilter((type, request) => {
+player.getNetworkingEngine().registerResponseFilter((type, response) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }

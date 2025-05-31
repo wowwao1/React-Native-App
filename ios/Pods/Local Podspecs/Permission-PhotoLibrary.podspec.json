@@ -1,11 +1,9 @@
 {
   "name": "Permission-PhotoLibrary",
   "dependencies": {
-    "RNPermissions": [
-
-    ]
+    "RNPermissions": []
   },
-  "version": "2.0.4",
+  "version": "2.2.2",
   "license": "MIT",
   "summary": "An unified permissions API for React Native on iOS and Android",
   "authors": "Mathieu Acthernoene <zoontek@gmail.com>",
@@ -17,7 +15,7 @@
   "requires_arc": true,
   "source": {
     "git": "https://github.com/react-native-community/react-native-permissions.git",
-    "tag": "2.0.4"
+    "tag": "2.2.2"
   },
   "source_files": "PhotoLibrary/*.{h,m}"
 }

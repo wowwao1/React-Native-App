@@ -1,14 +1,8 @@
 import * as React from 'react';
-import {
-  View,
-  StyleSheet,
-  AccessibilityRole,
-  AccessibilityState,
-} from 'react-native';
+import { View, StyleSheet, AccessibilityRole } from 'react-native';
 import { NavigationRoute } from 'react-navigation';
 
-// eslint-disable-next-line import/no-unresolved
-import { ScreenContainer } from 'react-native-screens';
+import { ScreenContainer, screensEnabled } from 'react-native-screens';
 
 import createTabNavigator, {
   NavigationViewProps,
@@ -26,6 +20,7 @@ type Config = {
   lazy?: boolean;
   tabBarComponent?: React.ComponentType<any>;
   tabBarOptions?: BottomTabBarOptions;
+  detachInactiveScreens?: boolean;
 };
 
 type Props = NavigationViewProps &
@@ -36,7 +31,7 @@ type Props = NavigationViewProps &
     getAccessibilityStates: (props: {
       route: NavigationRoute;
       focused: boolean;
-    }) => AccessibilityState[];
+    }) => string[];
     navigation: NavigationTabProp;
     descriptors: SceneDescriptorMap;
     screenProps?: unknown;
@@ -50,11 +45,8 @@ class TabNavigationView extends React.PureComponent<Props, State> {
   static defaultProps = {
     lazy: true,
     getAccessibilityRole: (): AccessibilityRole => 'button',
-    getAccessibilityStates: ({
-      focused,
-    }: {
-      focused: boolean;
-    }): AccessibilityState[] => (focused ? ['selected'] : []),
+    getAccessibilityStates: ({ focused }: { focused: boolean }) =>
+      focused ? ['selected'] : [],
   };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
@@ -132,19 +124,29 @@ class TabNavigationView extends React.PureComponent<Props, State> {
   _jumpTo = (key: string) => {
     const { navigation, onIndexChange } = this.props;
 
-    const index = navigation.state.routes.findIndex(route => route.key === key);
+    const index = navigation.state.routes.findIndex(
+      (route) => route.key === key
+    );
 
     onIndexChange(index);
   };
 
   render() {
-    const { navigation, renderScene, lazy } = this.props;
+    const {
+      navigation,
+      renderScene,
+      lazy,
+      detachInactiveScreens = true,
+    } = this.props;
     const { routes } = navigation.state;
     const { loaded } = this.state;
 
+    const enabled = screensEnabled?.() && detachInactiveScreens;
+
     return (
       <View style={styles.container}>
-        <ScreenContainer style={styles.pages}>
+        {/* @ts-ignore */}
+        <ScreenContainer enabled={enabled} style={styles.pages}>
           {routes.map((route, index) => {
             if (lazy && !loaded.includes(index)) {
               // Don't render a screen if we've never navigated to it
@@ -158,6 +160,7 @@ class TabNavigationView extends React.PureComponent<Props, State> {
                 key={route.key}
                 style={StyleSheet.absoluteFill}
                 isVisible={isFocused}
+                enabled={detachInactiveScreens}
               >
                 {renderScene({ route })}
               </ResourceSavingScene>

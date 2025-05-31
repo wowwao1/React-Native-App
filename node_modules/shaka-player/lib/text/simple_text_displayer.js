@@ -51,7 +51,7 @@ shaka.text.SimpleTextDisplayer = function(video) {
     let track = video.textTracks[i];
     track.mode = 'disabled';
 
-    if (track.label == shaka.text.SimpleTextDisplayer.TextTrackLabel_) {
+    if (track.label == shaka.Player.TextTrackLabel) {
       this.textTrack_ = track;
     }
   }
@@ -62,7 +62,7 @@ shaka.text.SimpleTextDisplayer = function(video) {
     // The individual text tracks from the manifest will still have their own
     // kinds which can be displayed in the app's UI.
     this.textTrack_ = video.addTextTrack(
-        'subtitles', shaka.text.SimpleTextDisplayer.TextTrackLabel_);
+        'subtitles', shaka.Player.TextTrackLabel);
   }
   this.textTrack_.mode = 'hidden';
 };
@@ -95,12 +95,57 @@ shaka.text.SimpleTextDisplayer.prototype.append = function(cues) {
   const convertToTextTrackCue =
       shaka.text.SimpleTextDisplayer.convertToTextTrackCue_;
 
+  // Flatten nestedCues.  If a cue has nested cues, their contents should be
+  // combined and replace the payload of the parent.  However, we don't want
+  // to modify the array or objects passed in, since we don't technically own
+  // them.  So we build a new array and replace certain items in it if they
+  // need to be flattened.
+  const flattenedCues = cues.map((cue) => {
+    if (cue.nestedCues.length) {
+      const payload = cue.nestedCues.map((inner) => {
+        if (inner.spacer) {
+          // This is a vertical spacer, so insert a newline.
+          return '\n';
+        } else {
+          // This is a real cue.  Add a space after it.  Extra spaces at the
+          // end or before a vertical spacer are removed with a Regexp below.
+          return inner.payload + ' ';
+        }
+      }).join('').replace(/ $/m, '');
+
+      const flatCue = cue.clone();
+      flatCue.nestedCues = [];
+      flatCue.payload = payload;
+      return flatCue;
+    } else {
+      return cue;
+    }
+  });
+
   // Convert cues.
-  let textTrackCues = [];
-  for (let i = 0; i < cues.length; i++) {
-    let cue = convertToTextTrackCue(cues[i]);
-    if (cue) {
-      textTrackCues.push(cue);
+  const textTrackCues = [];
+  const cuesInTextTrack = this.textTrack_.cues ?
+                          Array.from(this.textTrack_.cues) : [];
+
+  for (const inCue of flattenedCues) {
+    // When a VTT cue spans a segment boundary, the cue will be duplicated
+    // into two segments.
+    // To avoid displaying duplicate cues, if the current textTrack cues
+    // list already contains the cue, skip it.
+    const containsCue = cuesInTextTrack.some((cueInTextTrack) => {
+      if (cueInTextTrack.startTime == inCue.startTime &&
+          cueInTextTrack.endTime == inCue.endTime &&
+          cueInTextTrack.text == inCue.payload) {
+        return true;
+      }
+      return false;
+    });
+
+    if (!containsCue) {
+      const cue = convertToTextTrackCue(inCue);
+      if (cue) {
+        textTrackCues.push(cue);
+      }
     }
   }
 
@@ -117,7 +162,18 @@ shaka.text.SimpleTextDisplayer.prototype.append = function(cues) {
       // bottom up.  Reversing the order of equal cues means the first one
       // parsed will be at the top, as you would expect.
       // See https://github.com/google/shaka-player/issues/848 for more info.
-      return textTrackCues.indexOf(b) - textTrackCues.indexOf(a);
+      // However, this ordering behavior is part of VTTCue's "line" field.
+      // Some platforms don't have a real VTTCue and use a polyfill instead.
+      // When VTTCue is polyfilled or does not support "line", we should _not_
+      // reverse the order.  This occurs on IE11 and legacy Edge.
+      // eslint-disable-next-line no-restricted-syntax
+      if ('line' in VTTCue.prototype) {
+        // Native VTTCue
+        return textTrackCues.indexOf(b) - textTrackCues.indexOf(a);
+      } else {
+        // Polyfilled VTTCue
+        return textTrackCues.indexOf(a) - textTrackCues.indexOf(b);
+      }
     }
   });
 
@@ -187,7 +243,10 @@ shaka.text.SimpleTextDisplayer.convertToTextTrackCue_ = function(shakaCue) {
 
   vttCue.lineAlign = shakaCue.lineAlign;
   vttCue.positionAlign = shakaCue.positionAlign;
-  vttCue.size = shakaCue.size;
+  if (shakaCue.size) {
+    vttCue.size = shakaCue.size;
+  }
+
   try {
     // Safari 10 seems to throw on align='center'.
     vttCue.align = shakaCue.textAlign;
@@ -262,10 +321,3 @@ shaka.text.SimpleTextDisplayer.removeWhere_ = function(track, predicate) {
 
   track.mode = oldState;
 };
-
-
-/**
- * @const {string}
- * @private
- */
-shaka.text.SimpleTextDisplayer.TextTrackLabel_ = 'Shaka Player TextTrack';

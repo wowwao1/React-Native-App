@@ -18,9 +18,7 @@
   },
   "source_files": "ios/**/*.{h,m}",
   "dependencies": {
-    "React": [
-
-    ],
+    "React": [],
     "SDWebImage": [
       "~> 5.0"
     ],

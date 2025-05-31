@@ -55,24 +55,24 @@ describe('Player Src Equals', () => {
   // This test verifies that we can successfully load content that requires us
   // to use |src=|.
   it('loads content', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
   });
 
   // This test verifys that we can successfully unload content that required
   // |src=| to load.
   it('unloads content', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     await player.unload(/* initMediaSource= */ false);
   });
 
   it('can get asset uri after loading', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(player.getAssetUri()).toBe(SMALL_MP4_CONTENT_URI);
   });
 
   // TODO: test an HLS live stream on platforms supporting native HLS
   it('considers simple mp4 content to be VOD"', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(player.isLive()).toBeFalsy();
     expect(player.isInProgress()).toBeFalsy();
   });
@@ -80,14 +80,24 @@ describe('Player Src Equals', () => {
   // TODO: test an audio-only mp4
   // TODO: test audio-only HLS on platforms with native HLS
   it('considers audio-video mp4 content to be audio-video', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(player.isAudioOnly()).toBeFalsy();
+  });
+
+  it('allow load with startTime', async () => {
+    const startTime = 5;
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
+
+    // For some reason, the delta on IE & Edge can be 0.1 for this content and
+    // this start time.  It may be rounded to a key frame or something.
+    const delta = Math.abs(video.currentTime - startTime);
+    expect(delta).toBeLessThan(0.2);
   });
 
   // Since we don't have any manifest data, we must assume that we can seek
   // anywhere in the presentation; end-time will come from the media element.
   it('allows seeking throughout the presentation', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // For src=, the seekRange is based on video.seekable, so wait for this
     // event before proceeding to check seekRange.
@@ -125,7 +135,7 @@ describe('Player Src Equals', () => {
   // TODO: test HLS without DRM on platforms with native HLS
   // TODO: test HLS with DRM on platforms with native HLS
   it('considers simple content to be clear ', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     expect(player.keySystem()).toBe('');
     expect(player.drmInfo()).toBe(null);
@@ -136,7 +146,7 @@ describe('Player Src Equals', () => {
   // accurate information. However we can still report what the media element
   // surfaces.
   it('reports buffering information', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // For playback to begin so that we have some content buffered.
     video.play();
@@ -160,15 +170,25 @@ describe('Player Src Equals', () => {
   // When we load content via src=, can we use the trick play controls to
   // control the playback rate.
   it('can control trick play rate', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // Let playback run for a little.
     video.play();
     await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
+    let videoRateChange = false;
+    eventManager.listen(video, 'ratechange', () => {
+      videoRateChange = true;
+    });
+
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
     expect(video.playbackRate).toBe(2);
+
+    // It should also have fired a 'ratechange' event on the video.
+    // We may have to delay a short time to see the event, though.
+    await shaka.test.Util.delay(0.1);
+    expect(videoRateChange).toBe(true);
 
     // Let playback continue playing for a bit longer.
     await shaka.test.Util.delay(2);
@@ -180,7 +200,7 @@ describe('Player Src Equals', () => {
 
   // TODO: test audio-video mp4 content on platforms with audioTracks API
   it('reports variant tracks for video-only mp4 content', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // On platforms with audioTracks, such as Safari, we get one track here.
     if (video.audioTracks) {
@@ -192,7 +212,7 @@ describe('Player Src Equals', () => {
 
   // TODO: test HLS on platforms with native HLS
   it('allows selecting variant tracks', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // We can only get a variant track here on certain browsers.
     const tracks = player.getVariantTracks();
@@ -206,13 +226,13 @@ describe('Player Src Equals', () => {
 
   // TODO: test HLS with text tracks on platforms with native HLS
   it('reports no text tracks for simple mp4 content', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(player.getTextTracks()).toEqual([]);
   });
 
   // TODO: test HLS on platforms with native HLS
   it('allows selecting text tracks', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // We can only get a text track here on certain browsers.
     const tracks = player.getTextTracks();
@@ -224,9 +244,19 @@ describe('Player Src Equals', () => {
     }
   });
 
+  it('ignores extra text track on the video element', async () => {
+    // The extra text track with label "Shaka Player TextTrack" should not be
+    // listed.
+    video.addTextTrack('subtitles', /* label= */ shaka.Player.TextTrackLabel);
+
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(player.getTextTracks()).toEqual([]);
+  });
+
+
   // TODO: test HLS on platforms with native HLS
   it('returns no languages or roles for simple mp4 content', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // On platforms with audioTracks, such as Safari, we get one track, with
     // language set to whatever is in the mp4.
@@ -246,49 +276,10 @@ describe('Player Src Equals', () => {
     expect(player.getTextLanguagesAndRoles()).toEqual([]);
   });
 
-  // TODO: test language selection w/ HLS on platforms with native HLS
-  // This test is disabled until then.
-  xit('cannot select language or role', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
-
-    const language = 'en';
-    const role = 'main';
-
-    player.selectAudioLanguage(language);
-    expect(player.getAudioLanguages()).toEqual([]);
-    expect(player.getAudioLanguagesAndRoles()).toEqual([]);
-
-    player.selectAudioLanguage(language, role);
-    expect(player.getAudioLanguages()).toEqual([]);
-    expect(player.getAudioLanguagesAndRoles()).toEqual([]);
-
-    player.selectTextLanguage(language);
-    expect(player.getTextLanguages()).toEqual([]);
-    expect(player.getTextLanguagesAndRoles()).toEqual([]);
-
-    player.selectTextLanguage(language, role);
-    expect(player.getTextLanguages()).toEqual([]);
-    expect(player.getTextLanguagesAndRoles()).toEqual([]);
-  });
-
-  // TODO: test text visibility w/ HLS on platforms with native HLS
-  // This test is disabled until then.
-  xit('persists the text visibility setting', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
-
-    expect(player.isTextTrackVisible()).toBe(false);
-
-    await player.setTextTrackVisibility(true);
-    expect(player.isTextTrackVisible()).toBe(true);
-
-    await player.setTextTrackVisibility(false);
-    expect(player.isTextTrackVisible()).toBe(false);
-  });
-
   // Even though we loaded content using |src=| we should still be able to get
   // the playhead position as normal.
   it('can get the playhead position', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(video.readyState).toBeGreaterThan(0);
 
     expect(video.currentTime).toBeCloseTo(0);
@@ -307,7 +298,7 @@ describe('Player Src Equals', () => {
   // Even though we are not using all the internals, we should still get some
   // meaningful statistics.
   it('can get stats', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     // Wait some time for playback to start so that we will have a load latency
     // value.
@@ -322,7 +313,7 @@ describe('Player Src Equals', () => {
 
   // Because we have no manifest, we can't add text tracks.
   it('cannot add text tracks', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
 
     const pendingAdd = player.addTextTrack(
         'test:need-a-uri-for-text',
@@ -339,31 +330,50 @@ describe('Player Src Equals', () => {
   // Since we are not in-charge of streaming, calling |retryStreaming| should
   // have no effect.
   it('requesting streaming retry does nothing', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(player.retryStreaming()).toBeFalsy();
   });
 
   // Since we are not loading a manifest, we can't return a manifest.
   // |getManifest| should return |null|.
   it('has no manifest to return', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
     expect(player.getManifest()).toBeFalsy();
   });
 
   /**
    * @param {string} contentUri
+   * @param {?number} startTime
    * @return {!Promise}
    */
-  async function loadWithSrcEquals(contentUri) {
+  async function loadWithSrcEquals(contentUri, startTime) {
+    /** @type {!shaka.util.EventManager} */
+    const eventManager = new shaka.util.EventManager();
+
     const ready = new Promise((resolve) => {
-      eventManager.listenOnce(video, 'loadedmetadata', resolve);
+      eventManager.listenOnce(video, 'loadeddata', resolve);
     });
 
     await player.attach(video, /* initMediaSource= */ false);
-    await player.load(contentUri);
+    await player.load(contentUri, startTime);
 
     // Wait until the media element is ready with content. Waiting until this
     // point ensures it is safe to interact with the media element.
     await ready;
+
+    // The initial seek is triggered about the same time this ready promise
+    // resolves.  Wait (with timeout) for movement, so that the initial-seek
+    // promise chain has time to resolve before we test our expectations.
+    if (startTime != null) {
+      const waiter = new shaka.test.Waiter(eventManager);
+      if (video.currentTime == 0) {
+        // A one-second timeout is too short for Chromecast, but a longer
+        // timeout doesn't hurt anyone.  This will always resolve as fast as
+        // playback can actually start.
+        await waiter.timeoutAfter(5).failOnTimeout(true).waitForMovement(video);
+      }
+    }
+
+    eventManager.release();
   }
 });

@@ -14,7 +14,7 @@
 
 var db = require('mime-db')
 
-const extname = (path) => {
+const extname = function(path) {
   if (!path || path.indexOf('.') === -1) { return '' }
   path = '.' + path.split('.').pop().toLowerCase()
   return /.*(\..*)/g.exec(path)[1] || ''

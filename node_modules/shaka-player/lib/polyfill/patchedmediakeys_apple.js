@@ -23,6 +23,7 @@ goog.require('shaka.polyfill.register');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
+goog.require('shaka.util.MediaReadyState');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.Uint8ArrayUtils');
 
@@ -140,11 +141,11 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySystemAccess =
     }
   }
 
-  // As per the spec, this should be a DOMException, but there is not a public
-  // constructor for DOMException.
+  // According to the spec, this should be a DOMException, but there is not a
+  // public constructor for that.  So we make this look-alike instead.
   const unsupportedKeySystemError = new Error('Unsupported keySystem');
   unsupportedKeySystemError.name = 'NotSupportedError';
-  unsupportedKeySystemError.code = DOMException.NOT_SUPPORTED_ERR;
+  unsupportedKeySystemError['code'] = DOMException.NOT_SUPPORTED_ERR;
   throw unsupportedKeySystemError;
 };
 
@@ -375,13 +376,11 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeys.prototype.
   try {
     // Some browsers require that readyState >=1 before mediaKeys can be set, so
     // check this and wait for loadedmetadata if we are not in the correct state
-    if (media.readyState >= 1) {
-      media.webkitSetMediaKeys(this.nativeMediaKeys_);
-    } else {
-      this.eventManager_.listenOnce(media, 'loadedmetadata', () => {
-        media.webkitSetMediaKeys(this.nativeMediaKeys_);
-      });
-    }
+    shaka.util.MediaReadyState.waitForReadyState(media,
+        HTMLMediaElement.HAVE_METADATA,
+        this.eventManager_, () => {
+          media.webkitSetMediaKeys(this.nativeMediaKeys_);
+        });
 
     return Promise.resolve();
   } catch (exception) {
@@ -537,6 +536,8 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession.prototype.
  *
  * @this {!HTMLMediaElement}
  * @param {!MediaKeyEvent} event
+ * @suppress {constantProperty} We reassign what would be const on a real
+ *   MediaEncryptedEvent, but in our look-alike event.
  * @private
  */
 shaka.polyfill.PatchedMediaKeysApple.onWebkitNeedKey_ = function(event) {
@@ -551,12 +552,30 @@ shaka.polyfill.PatchedMediaKeysApple.onWebkitNeedKey_ = function(event) {
 
   goog.asserts.assert(event.initData != null, 'missing init data!');
 
-  // NOTE: Because "this" is a real EventTarget, the event we dispatch here must
-  // also be a real Event.
+  // Convert the prefixed init data to match the native 'encrypted' event.
+  const uint8 = new Uint8Array(event.initData);
+  const dataview =
+      new DataView(uint8.buffer, uint8.byteOffset, uint8.byteLength);
+  // The first part is a 4 byte little-endian int, which is the length of
+  // the second part.
+  const length = dataview.getUint32(
+      /* position= */ 0, /* littleEndian= */ true);
+  if (length + 4 != uint8.byteLength) {
+    throw new RangeError('Malformed FairPlay init data');
+  }
+  // The remainder is a UTF-16 skd URL.  Convert this to UTF-8 and pass on.
+  const str = shaka.util.StringUtils.fromUTF16(
+      uint8.subarray(4), /* littleEndian= */ true);
+  const initData = shaka.util.StringUtils.toUTF8(str);
+
+  // NOTE: Because "this" is a real EventTarget, the event we dispatch here
+  // must also be a real Event.
   const event2 = new Event('encrypted');
-  // TODO: validate this initDataType against the unprefixed version
-  event2.initDataType = 'cenc';
-  event2.initData = event.initData;
+
+  const encryptedEvent =
+    /** @type {!MediaEncryptedEvent} */(/** @type {?} */(event2));
+  encryptedEvent.initDataType = 'skd';
+  encryptedEvent.initData = initData;
 
   this.dispatchEvent(event2);
 };
@@ -628,7 +647,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession.prototype.
   shaka.log.debug('PatchedMediaKeysApple.onWebkitKeyError_', event);
 
   const error = new Error('EME PatchedMediaKeysApple key error');
-  error.errorCode = this.nativeMediaKeySession_.error;
+  error['errorCode'] = this.nativeMediaKeySession_.error;
 
   if (this.generateRequestPromise_ != null) {
     this.generateRequestPromise_.reject(error);

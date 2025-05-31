@@ -1,7 +1,7 @@
 //
 // UIImage+RSKImageCropper.h
 //
-// Copyright (c) 2014-present Ruslan Skorb, http://ruslanskorb.com/
+// Copyright © 2014-present Ruslan Skorb. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,16 @@
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface UIImage (RSKImageCropper)
 
 // Fix the orientation of the image.
-- (UIImage *)fixOrientation;
+- (nullable UIImage *)fixOrientation;
 
 // Rotate the image clockwise around the center by the angle, in radians.
-- (UIImage *)rotateByAngle:(CGFloat)angleInRadians;
+- (nullable UIImage *)rotateByAngle:(CGFloat)angleInRadians;
 
 @end
+
+NS_ASSUME_NONNULL_END

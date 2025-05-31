@@ -545,6 +545,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     mimeType: defaultMimeType,
     codecs: defaultCodecs,
     frameRate: undefined,
+    pixelAspectRatio: undefined,
     bandwidth: undefined,
     width: undefined,
     height: undefined,
@@ -559,6 +560,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     emsgSchemeIdUris: null,
     roles: [],
     channelsCount: null,
+    audioSamplingRate: null,
     closedCaptions: null,
   };
   return stream;
@@ -737,6 +739,20 @@ shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
 
 
 /**
+ * Sets the pixel aspect ratio of the current stream.
+ *
+ * @param {string} pixelAspectRatio
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.pixelAspectRatio =
+    function(pixelAspectRatio) {
+  let stream = this.currentStream_();
+  stream.pixelAspectRatio = pixelAspectRatio;
+  return this;
+};
+
+
+/**
  * Sets the width and height of the current stream.
  *
  * @param {number} width
@@ -822,6 +838,17 @@ shaka.test.ManifestGenerator.prototype.roles = function(roles) {
 shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
   let stream = this.currentStream_();
   stream.channelsCount = count;
+  return this;
+};
+
+
+/**
+ * @param {number} rate
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.audioSamplingRate = function(rate) {
+  let stream = this.currentStream_();
+  stream.audioSamplingRate = rate;
   return this;
 };
 

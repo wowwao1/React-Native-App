@@ -1,4 +1,4 @@
-## RSKImageCropper [![Build Status](https://travis-ci.org/ruslanskorb/RSKImageCropper.svg)](https://travis-ci.org/ruslanskorb/RSKImageCropper) [![Coverage Status](https://coveralls.io/repos/ruslanskorb/RSKImageCropper/badge.svg)](https://coveralls.io/r/ruslanskorb/RSKImageCropper) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/ruslanskorb/RSKImageCropper)
+## RSKImageCropper ![CI](https://github.com/ruslanskorb/RSKImageCropper/actions/workflows/main.yml/badge.svg) ![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat) ![CocoaPods](https://img.shields.io/cocoapods/v/RSKImageCropper.svg?style=flat) ![Carthage](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)
 
 <p align="center">
 	<img src="Screenshot.png" alt="Sample">
@@ -7,7 +7,13 @@
 An image cropper for iOS like in the Contacts app with support for landscape orientation.
 
 ## Installation
-*RSKImageCropper requires iOS 6.0 or later.*
+*RSKImageCropper requires iOS 12.0 or later.*
+
+### Using [Swift Package Manager](https://swift.org/package-manager/)
+
+1. To add the `RSKImageCropper` package to your Xcode project, select File > Swift Packages > Add Package Dependency and enter the repository URL. 
+    
+        https://github.com/ruslanskorb/RSKImageCropper.git
 
 ### Using [CocoaPods](http://cocoapods.org)
 
@@ -43,9 +49,9 @@ Just create a view controller for image cropping and set the delegate.
 - (IBAction)onButtonTouch:(UIButton *)sender
 {
     UIImage *image = [UIImage imageNamed:@"image"];
-    RSKImageCropViewController *imageCropVC = [[RSKImageCropViewController alloc] initWithImage:image];
-    imageCropVC.delegate = self;
-    [self.navigationController pushViewController:imageCropVC animated:YES];
+    RSKImageCropViewController *imageCropViewController = [[RSKImageCropViewController alloc] initWithImage:image];
+    imageCropViewController.delegate = self;
+    [self.navigationController pushViewController:imageCropViewController animated:YES];
 }
 ```
 
@@ -87,7 +93,7 @@ Then implement the delegate functions.
 
 ## DataSource
 
-`RSKImageCropViewControllerDataSource` provides three data source methods. The method `imageCropViewControllerCustomMaskRect:` asks the data source a custom rect for the mask. The method `imageCropViewControllerCustomMaskPath:` asks the data source a custom path for the mask. The method `imageCropViewControllerCustomMovementRect:` asks the data source a custom rect in which the image can be moved. To use them, implement the data source in your view controller.
+`RSKImageCropViewControllerDataSource` provides three data source methods. The method `imageCropViewControllerCustomMaskRect:` asks the data source for a custom rect for the mask. The method `imageCropViewControllerCustomMaskPath:` asks the data source for a custom path for the mask. The method `imageCropViewControllerCustomMovementRect:` asks the data source for a custom rect in which the image can be moved. To use them, implement the data source in your view controller.
 
 ```objective-c
 @interface ViewController () <RSKImageCropViewControllerDataSource>
@@ -175,12 +181,16 @@ Then implement the data source functions.
 
 ## Coming Soon
 
-- If you would like to request a new feature, feel free to raise as an issue.
+- If you would like to request a new feature, feel free to raise an issue.
 
 ## Demo
 
 Build and run the `RSKImageCropperExample` project in Xcode to see `RSKImageCropper` in action.
 Have fun. Fork and send pull requests. Figure out hooks for customization.
+
+## Privacy
+
+`RSKImageCropper` doesn't require a privacy manifest. According to [information received from Apple](https://developer.apple.com/forums/thread/746481?answerId=782256022#782256022), we should avoid adding an empty privacy manifest to our frameworks.
 
 ## Contact
 
@@ -192,4 +202,4 @@ Ruslan Skorb
 
 ## License
 
-This project is is available under the MIT license. See the LICENSE file for more info. Attribution by linking to the [project page](https://github.com/ruslanskorb/RSKImageCropper) is appreciated.
+This project is available under the MIT license. See the LICENSE file for more info. Attribution by linking to the [project page](https://github.com/ruslanskorb/RSKImageCropper) is appreciated.

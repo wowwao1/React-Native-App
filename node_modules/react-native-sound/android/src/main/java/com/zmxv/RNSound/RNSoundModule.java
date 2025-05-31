@@ -59,6 +59,9 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
   @ReactMethod
   public void prepare(final String fileName, final Double key, final ReadableMap options, final Callback callback) {
     MediaPlayer player = createMediaPlayer(fileName);
+    if (options.hasKey("speed") && android.os.Build.VERSION.SDK_INT >= 23) {
+      player.setPlaybackParams(player.getPlaybackParams().setSpeed((float)options.getDouble("speed")));
+    }
     if (player == null) {
       WritableMap e = Arguments.createMap();
       e.putInt("code", -1);
@@ -192,6 +195,16 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
         }
     }
 
+    if (fileName.startsWith("file:/")){
+      try {
+        mediaPlayer.setDataSource(fileName);
+      } catch(IOException e) {
+        Log.e("RNSoundModule", "Exception", e);
+        return null;
+      }
+      return mediaPlayer;
+    }
+    
     File file = new File(fileName);
     if (file.exists()) {
       mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -204,7 +217,7 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
       }
       return mediaPlayer;
     }
-    
+
     return null;
   }
 
@@ -320,7 +333,7 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
       }
     }
   }
-	
+
   @Override
   public void onCatalystInstanceDestroy() {
     java.util.Iterator it = this.playerPool.entrySet().iterator();
@@ -387,6 +400,19 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
   }
 
   @ReactMethod
+  public void setPitch(final Double key, final Float pitch) {
+    if (android.os.Build.VERSION.SDK_INT < 23) {
+      Log.w("RNSoundModule", "setPitch ignored due to sdk limit");
+      return;
+    }
+
+    MediaPlayer player = this.playerPool.get(key);
+    if (player != null) {
+      player.setPlaybackParams(player.getPlaybackParams().setPitch(pitch));
+    }
+  }
+
+  @ReactMethod
   public void setCurrentTime(final Double key, final Float sec) {
     MediaPlayer player = this.playerPool.get(key);
     if (player != null) {
@@ -409,7 +435,6 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
   public void setSpeakerphoneOn(final Double key, final Boolean speaker) {
     MediaPlayer player = this.playerPool.get(key);
     if (player != null) {
-      player.setAudioStreamType(AudioManager.STREAM_MUSIC);
       AudioManager audioManager = (AudioManager)this.context.getSystemService(this.context.AUDIO_SERVICE);
       if(speaker){
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
@@ -458,5 +483,15 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
     final Map<String, Object> constants = new HashMap<>();
     constants.put("IsAndroid", true);
     return constants;
+  }
+
+  @ReactMethod
+  public void addListener(String eventName) {
+    // Keep: Required for RN built in Event Emitter Calls.
+  }
+
+  @ReactMethod
+  public void removeListeners(Integer count) {
+    // Keep: Required for RN built in Event Emitter Calls.
   }
 }

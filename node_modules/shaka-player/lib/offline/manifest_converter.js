@@ -199,6 +199,7 @@ shaka.offline.ManifestConverter = class {
       width: streamDB.width || undefined,
       height: streamDB.height || undefined,
       frameRate: streamDB.frameRate || undefined,
+      pixelAspectRatio: streamDB.pixelAspectRatio || undefined,
       kind: streamDB.kind,
       encrypted: streamDB.encrypted,
       keyId: streamDB.keyId,
@@ -211,6 +212,7 @@ shaka.offline.ManifestConverter = class {
       emsgSchemeIdUris: null,
       roles: [],
       channelsCount: null,
+      audioSamplingRate: null,
       closedCaptions: null,
     };
 

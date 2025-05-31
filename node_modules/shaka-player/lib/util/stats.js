@@ -38,9 +38,14 @@ shaka.util.Stats = class {
     this.totalDroppedFrames_ = NaN;
     /** @private {number} */
     this.totalDecodedFrames_ = NaN;
+    /** @private {number} */
+    this.totalCorruptedFrames_ = NaN;
 
     /** @private {number} */
     this.loadLatencySeconds_ = NaN;
+
+    /** @private {number} */
+    this.licenseTimeSeconds_ = NaN;
 
     /** @private {number} */
     this.variantBandwidth_ = NaN;
@@ -66,6 +71,16 @@ shaka.util.Stats = class {
     this.totalDecodedFrames_ = decoded;
   }
 
+
+  /**
+   * Update corrupted frames. This will replace the previous values.
+   *
+   * @param {number} corrupted
+   */
+  setCorruptedFrames(corrupted) {
+    this.totalCorruptedFrames_ = corrupted;
+  }
+
   /**
    * Set the width and height of the video we are currently playing.
    *
@@ -85,6 +100,15 @@ shaka.util.Stats = class {
    */
   setLoadLatency(seconds) {
     this.loadLatencySeconds_ = seconds;
+  }
+
+  /**
+   * Record the cumulative time spent on license requests during this session.
+   *
+   * @param {number} seconds
+   */
+  setLicenseTime(seconds) {
+    this.licenseTimeSeconds_ = seconds;
   }
 
   /**
@@ -128,11 +152,13 @@ shaka.util.Stats = class {
       streamBandwidth: this.variantBandwidth_,
       decodedFrames: this.totalDecodedFrames_,
       droppedFrames: this.totalDroppedFrames_,
+      corruptedFrames: this.totalCorruptedFrames_,
       estimatedBandwidth: this.bandwidthEstimate_,
       loadLatency: this.loadLatencySeconds_,
       playTime: this.stateHistory_.getTimeSpentIn('playing'),
       pauseTime: this.stateHistory_.getTimeSpentIn('paused'),
       bufferingTime: this.stateHistory_.getTimeSpentIn('buffering'),
+      licenseTime: this.licenseTimeSeconds_,
       stateHistory: this.stateHistory_.getCopy(),
       switchHistory: this.switchHistory_.getCopy(),
     };
@@ -151,11 +177,13 @@ shaka.util.Stats = class {
       streamBandwidth: NaN,
       decodedFrames: NaN,
       droppedFrames: NaN,
+      corruptedFrames: NaN,
       estimatedBandwidth: NaN,
       loadLatency: NaN,
       playTime: NaN,
       pauseTime: NaN,
       bufferingTime: NaN,
+      licenseTime: NaN,
       switchHistory: [],
       stateHistory: [],
     };
